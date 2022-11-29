@@ -4,8 +4,11 @@
 
 1. Syntax.
 2. Names.
-3. Types.
+3. Type System.
 4. Semantics.
+5. Memory model.
+6. Evaluation Mechanism.
+7. Abstraction Mechanism.
 
 
 -Increased ability to express ideas
@@ -80,3 +83,17 @@
     - Temporal Access Errors.
 - Type cast Errors.
 - Memory Leak Errors - fail to release all the memory they allocate.
+
+```eng
+**Defn:**
+A toolchain is a set of tools that are used in a chain with the purpose of compiling and running code written in
+a specific programming language.
+
+The C toolchain is a toolchain because in addition to the compiler, you also need the standard library which contains the implementations of standard functions in binary form (CPU instructions), the assembler, because technically the compiler outputs assembly language, which is a human readable format for the CPU instructions which is converted to the actual binary CPU instructions by the assembler (also called the object file), and finally the linker which links the standard library, our object files and possibly other libraries together to form the final executable.
+
+```
+
+- Language design is difficult because of the extraordinary complex and unexpected interaction effects between all parts of the language, difficult to design and maintain a strict structuring discipline.
+
+- Programming Languages should aid in program design, documentation and debugging.
+

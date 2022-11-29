@@ -10,3 +10,10 @@
 
 - Understanding the problem.
 - 
+
+## Computational Thinking
+
+- Decomposition - break problem down into subproblems.
+- Pattern Recognition - notice similarities, differences, properties or trends in data.
+- Pattern Generalization - define a concept or idea in general terms via doing away with the unnecessary. Abstraction.
+- Algorithm design - repeatable, step-by-step process to solve a particular problem.

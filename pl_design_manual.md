@@ -8,3 +8,4 @@
     - Scalars.
     - Algebraic data types.
     - First-class functions.
+    - Recursion.
