@@ -17,7 +17,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 1. Syntax — the form of programming languages.
 2. Semantics — the meaning of programming languages.
-3. Pragmatics — the implementation of programming languages.
+3. Pragmatics — the implementation of programming languages/ how semantics are implemented/computed.
 
 **Static Single Assignment**
 **Instruction Set Architecture**
@@ -59,3 +59,14 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Finite automata and push-down automata(scanning and parsing)
 - Fixed-point algorithms(Data flow analysis)
 - Dynamic allocation, Synchronization, Naming, Locality, Memory hierarchy management and Pipeline scheduling.
+
+**RISC - Reduced Instruction Set Computing**
+/ introduced a "load and store" architecture.
+/ led to more instructions but were executed faster.
+/ more instructions led to need for more memory, aided by reducing prices of memory.
+
+**Note on GC**
+
+-  fully concurrent garbage collection is the future of automatic memory management. I’m talking garbage collectors that run in other threads and clean up after me without ever stopping me in the middle of what I’m doing.
+
+- 
