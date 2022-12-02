@@ -97,3 +97,11 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
 
 - Programming Languages should aid in program design, documentation and debugging.
 
+
+## Compiler Types
+
+- Single-pass compilers.
+- Multi-pass compilers.
+- Optimising compilers.
+- Load-and-go compilers.
+- Interactive compilers.
