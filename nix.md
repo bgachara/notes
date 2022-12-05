@@ -30,3 +30,4 @@
 
 - Main idea: store s/w components in isolation from each other in a central component store, under path names that contain cryptographic hashes of all inputs involved in building the component.
 - This prevents undeclared dependencies and enables support for side-by-side existence of component versions and variants.
+- Isolation between components prevents interference.
