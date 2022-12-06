@@ -57,7 +57,7 @@
     - Bounded Iterations.
     - Conditional / Unbounded Iterations.
 - Subroutines / Procedures.
-- 
+
 
 ## Tools
 
@@ -105,3 +105,10 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
 - Optimising compilers.
 - Load-and-go compilers.
 - Interactive compilers.
+
+```eng
+
+**Orthogonality** - Small set of well thought features that can be combined in a logical way to supply more powerful building blocks.
+ - Ideally those features should not intefere with one another i.e inconsistencies, exceptional cases and arbitrary restrictions. 
+
+```

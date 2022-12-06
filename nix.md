@@ -31,3 +31,18 @@
 - Main idea: store s/w components in isolation from each other in a central component store, under path names that contain cryptographic hashes of all inputs involved in building the component.
 - This prevents undeclared dependencies and enables support for side-by-side existence of component versions and variants.
 - Isolation between components prevents interference.
+
+## Nix Overview
+
+
+### Nix Store
+
+- Component refers to the basic unit of deployment, set of files that implement some arbitrary functionality through an interface.
+- To Nix this is just a set of files in a file system.
+- All this live in the Nix store(component store)
+- Each component is stored in isolation, no two components have the same file name in the store.
+- Naming convention is what gives Nix the ability to prevent undeclared dependencies and component interference. It is a representation of the cryptographic hash of all inputs involved in building the component.
+- Collission resistant, 32 characters long store path.
+- Inputs include: sources of the components, script that performed the build, any arguments or env vars passed to the build, build time dependencies(compiler, linker, libraries, std unix tools)
+- Hashes allow for complete identification of dependecies and prevention of interference.
+- Any slight change will be reflected in the hash.   
