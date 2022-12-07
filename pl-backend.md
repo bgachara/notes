@@ -23,6 +23,8 @@ There is a tendency to prefer constructions that are simplest in that language r
 **Instruction Set Architecture**
 **Interpreters vs Compilers**
 / both build an *internal model of the structure and meaning of the program*.
+/ major con of interpreter is when you have to do the same thing more than once, ran translator more than once.
+/ Just-In-Time try to provide the best of both worlds....warm and hot code,
 
 ## Compilers
 

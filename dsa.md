@@ -1,5 +1,7 @@
 # Data Structures and Algorithms
 
+`Any problem in computer science can be solved using indirection`
+
 ## Design and Analysis of Algorithms.
 
 - Algorithm design techniques.
