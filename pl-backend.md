@@ -62,6 +62,15 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Fixed-point algorithms(Data flow analysis)
 - Dynamic allocation, Synchronization, Naming, Locality, Memory hierarchy management and Pipeline scheduling.
 
+## Compiler Types
+
+- Single-pass compilers.
+- Multi-pass compilers.
+- Optimising compilers.
+- Load-and-go compilers.
+- Interactive compilers.
+
+
 **RISC - Reduced Instruction Set Computing**
 / introduced a "load and store" architecture.
 / led to more instructions but were executed faster.
@@ -76,7 +85,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 ## AOT
 
-- Most straightforward compilers are ahead-of-time
+- Most straightforward compilers are ahead-of-time.
 
 
 ## JIT
