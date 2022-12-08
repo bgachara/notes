@@ -1,12 +1,14 @@
 # PROGRAMMING LANGUAGES BACKEND
 
+`everything behind the programming language syntax and semantics`
+
 - A language feature is defined by its statics, the rules governing the use of the feature in a program, and its dynamics, the
   rules defining how programs using this feature are to be executed. The concept of safety
   emerges as the coherence of the statics and the dynamics of a language.
 
 - Formal language for expressing computation and designed to be expressive, concise and clear.
 
-```eng
+```bash
 
 I emphasize to students that my goal is for them to learn how to learn a programming language, rather than to
 retain detailed specifics of any one programming language.
@@ -113,4 +115,5 @@ There is a tendency to prefer constructions that are simplest in that language r
   - Loop-Invariant code motion.
 - Hotspot detection
 - Method Inlining
-- Range check elimination
+- Range check elimination.
+
