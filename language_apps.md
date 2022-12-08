@@ -55,3 +55,7 @@
     - Syntax Directed Translator
 
 *An Interpreter simulates a hardware enviroment in the machine hence the virtual machine name*
+
+- The best way to build a language application is to start with the end in mind, figure out the information you need in order to generate the output, that tells you what the final stage before the generator computes, then figure what that stage needs all the way back to the reader.
+
+- 
