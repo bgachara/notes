@@ -84,6 +84,7 @@
 - Type cast Errors.
 - Memory Leak Errors - fail to release all the memory they allocate.
 
+
 ```eng
 **Defn:**
 A toolchain is a set of tools that are used in a chain with the purpose of compiling and running code written in

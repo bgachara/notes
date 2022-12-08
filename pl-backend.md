@@ -71,4 +71,37 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 -  fully concurrent garbage collection is the future of automatic memory management. I’m talking garbage collectors that run in other threads and clean up after me without ever stopping me in the middle of what I’m doing.
 
-- 
+
+- Ahead of Time compilation(**AOT**) vs Just in Time compilation(**JIT**)
+
+## AOT
+
+- Most straightforward compilers are ahead-of-time
+
+
+## JIT
+
+- is a hybrid of compiled and interpreted languages, runs interpreted first then notices the "hot" code which it then compiles in order to optimize.
+- Trace based vs Method based.
+- Trace: analyses what paths(traces) are often used, and to which methods they belong, more efficient and more overhead.
+- Method: only analyses the calls, less efficient and less overhead.
+- Disadvantage: memory usage and warmup time.
+- Memory usage: you have to have both the compiled and interpreted version stored in memory.
+- Also has to keep information about the method i.e number of times called, arguments, times spent.
+- Warmup time: has to recognize that a method is called a lot and then take time to compile it.
+- JIT is good for programs that run for a long time, background and network servers.
+
+## Profiling
+
+- Necessary for efficient optimizations.
+- Sampling based(statistical approach,less precise and very efficient) or Event based(only triggered by certain events)
+- Call graph
+- Event tracing
+- Static and Dynamic 
+- Static Optimizations
+  - Dead code elimination
+  - Constant folding and propagation
+  - Loop-Invariant code motion.
+- Hotspot detection
+- Method Inlining
+- Range check elimination
