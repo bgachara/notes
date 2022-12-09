@@ -117,3 +117,5 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
 - Basic Abstraction - most localised machine information.
 - Structured Abstraction - intermediate information about the structure of a program.
 - Unit Abstraction - large scale information in the program.
+
+Imperative - sequence of statements that represent commands.
