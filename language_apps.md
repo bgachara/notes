@@ -1,5 +1,16 @@
 # Language Applications
 
+*This is any program that processes, analyzes or translates an input file*
+*Implementing a language means building an application that executes or performs tasks according to sentences in that language*
+
+By relieving the brain of all unnecessary work, a good notation sets it free to concentrate on 
+more advanced problems. . . . Civilization advances by extending the number of important operations 
+which we can perform without thinking about them.
+
+A.N Whitehead
+
+`configuration file readers, data readers, model-driven code generators, source-to-source translators, source analyzers, interpreters`
+
 ## Categories
 
 - Reader

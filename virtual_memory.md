@@ -3,6 +3,8 @@
 `Notes on Virtual Memory`
 `Any problem in computer science can be solved using indirection`
 
+**Machine Register** - High speed memory cells that hold data for arithmetic and logic computations.
+
 ## Problems for VM
 
 - Memory Space not enough.

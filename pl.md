@@ -106,3 +106,14 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
  - Ideally those features should not intefere with one another i.e inconsistencies, exceptional cases and arbitrary restrictions. 
 
 ```
+
+## Types of PL abstraction
+
+- Data Abstraction
+- Control Abstraction
+
+## Levels of Abstraction
+
+- Basic Abstraction - most localised machine information.
+- Structured Abstraction - intermediate information about the structure of a program.
+- Unit Abstraction - large scale information in the program.
