@@ -88,6 +88,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 ## AOT
 
 - Most straightforward compilers are ahead-of-time.
+- Also known as Static Compilation.
 
 
 ## JIT
