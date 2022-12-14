@@ -153,3 +153,36 @@ There is a tendency to prefer constructions that are simplest in that language r
 ## Cross-compilation vs Bootstrapping
 
 - The process of modifying an existing compiler to work on a new machine is called porting the compiler.
+- Self-compiling compilers
+
+## Simple machine architecture
+
+- Many CPU chips used in modern computers have one or more internal *registers* or *accumulators*, which may be regarded as highly local memory where simple arithmetic and logical ops may be performed and between which local data transfers may take place.
+- Fundamental register is the *instruction register* through which moves the bytes representing the fundamental machine-level instructions that processor can obey.
+- Instructions can be extremely simple i.e "clear a register" or "move a byte from one register to another".
+- Program counter or Instruction pointer is used to keep track of the address in memory of the next instruction to be fed to the processor's instruction register.
+- 
+
+### Address modes
+
+- **Three-address code** - an *opcode*(operation code) is followed by two operands and a destination.
+- operation   destination, operand, operand
+- **Two-address code** - an operand is followed by one operand and one destination.
+- operation   destination, operand
+- **One-address code** - common in accumulator machines.
+
+## Formal Languages
+
+- Metalanguage - a language used to describe another language. i.e English is a kinda metalanguage.
+- Syntax rules: describe the form.
+- Semantic rules: describe the meaning.
+- Backus-Naur-Form
+
+## Grammars
+
+- Set of rules for describing sentences.
+- Grammar = { N, T, S, P }
+  - *N* - a finite set of non-terminal symbols.
+  - *T* - a finite set of terminal symbols.
+  - *S* - a special goal or start or distinguished symbol.
+  - *P* - a finite set of production rules or simply, productions.
