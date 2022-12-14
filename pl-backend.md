@@ -8,7 +8,7 @@
 
 - Formal language for expressing computation and designed to be expressive, concise and clear.
 
-```bash
+```eng
 
 I emphasize to students that my goal is for them to learn how to learn a programming language, rather than to
 retain detailed specifics of any one programming language.
@@ -78,7 +78,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 / led to more instructions but were executed faster.
 / more instructions led to need for more memory, aided by reducing prices of memory.
 
-**Note on GC**
+## Garbage Collection
 
 -  fully concurrent garbage collection is the future of automatic memory management. I’m talking garbage collectors that run in other threads and clean up after me without ever stopping me in the middle of what I’m doing.
 
@@ -96,7 +96,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 - is a hybrid of compiled and interpreted languages, runs interpreted first then notices the "hot" code which it then compiles in order to optimize.
 - Trace based vs Method based.
 - Trace: analyses what paths(traces) are often used, and to which methods they belong, more efficient and more overhead.
-- Method: only analyses the calls, less efficient and less overhead.
+- Method / Tiering: only analyses the calls, less efficient and less overhead.
 - Disadvantage: memory usage and warmup time.
 - Memory usage: you have to have both the compiled and interpreted version stored in memory.
 - Also has to keep information about the method i.e number of times called, arguments, times spent.
@@ -118,3 +118,38 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Method Inlining
 - Range check elimination.
 
+## Translator classification and structure
+
+- Translators main function is to change the representation of an algorithm from one form to another and not execute it.
+- T-diagrams are used to describe translators.
+- T-diagrams were first introduced by Bratman(1961) and further refined by Earley and Sturgis.
+
+### Classes of translators
+
+- Assembler: map low-level language instructions into machine code which can then be executed directly.
+- Macro-assembler: variation of the above but map into a sequence of machine-level instructions, extend the assembly language.
+- Compiler: translators that map high-level language instructions into machine code.
+- Pre-processor: translators that perform simple text substitutions before translations take place.
+- High-level translator: map one high-level language into another.
+- Decompiler/disassembler: refers to translators that take object code and try to regenerate source code at a higher level.
+
+- Self-resident translators(generate code for their host machines) vs Cross translators (generate code for other machines in addition to host)
+- *Load-and-go* translators.
+- *Sequential conjuction* or *Short-circuit* approach to handling compound Boolean expressions.
+
+## Code Generator
+
+- decide memory locations for data, generating code to access such locations, selecting registers for intermediate calculations and indexing etc.
+
+## Errors
+
+- Error handler, error reporter, error recovery and error correction.
+- Error recovery is when the translation process attempts to carry on after detecting an error and error correction/repair when it attempts to correct the error from context.
+- Error detection at compile-time in the source code must not be confused with error detection at run-time when executing the object code.
+- Many code generators are responsible for adding error-checking code to the program, can be rudimentary or heavy.
+- Such code can drastically reduce the efficiency of a program.
+- Mistaked detected at compile-time are known as *errors* while those that show up at run-time are *exceptions*
+
+## Cross-compilation vs Bootstrapping
+
+- The process of modifying an existing compiler to work on a new machine is called porting the compiler.
