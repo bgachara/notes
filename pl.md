@@ -119,3 +119,5 @@ Ideally those features should not intefere with one another or hedged out via in
 - Unit Abstraction - large scale information in the program.
 
 Imperative - sequence of statements that represent commands.
+
+- *What is hidden control flow*

@@ -20,8 +20,40 @@
 - Frameworks come with tooling that helps with testing, linting among other functions.
 - Compartmentalization.
 - Routing. (server-side routing vs client-side routing)
-- 
- 
+
+## Rendering Strategies.
+
+- Client-Side Rendering.
+    - render individual pages all in the client's browser.
+    - use web apis provided by modern browsers.
+    - poor seo as se don't execute js.
+    - load can get huge as js is being executed hence splash screens.
+- Server-Side Rendering.
+    - computes all html before responding and delivering a full page.
+    - seo friendly.
+    - most metrics are fast.
+    - ttb slower as all computations are done.
+- Static Site Generation. 
+    - Precomputes dynamic pages up front.
+    - all metrics served well too.
+    - lower costs too and excellent scalability.
+    - changes require rebuilding of the site.
+- Hybrid rendering strategies.
+    - universal/isomorphic apps, hydration and client-side fetching.
+    - 
+## Metrics
+
+- Time to First Byte (TTFB)
+    - Used to determine the load on the server and the network between client and server.
+- First Paint.
+    - Included TTFB and the computation client has to do before rendering job.
+- First Contentful Paint
+    - Marks time first text or image is painted.
+- Largest constentful Paint
+    - Time until user sees expected results.
+- Time to Interactive
+    - Time taken for page to be fully interactive.
+
 
 ## State Management
 

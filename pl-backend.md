@@ -83,7 +83,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 -  fully concurrent garbage collection is the future of automatic memory management. I’m talking garbage collectors that run in other threads and clean up after me without ever stopping me in the middle of what I’m doing.
 
 
-- Ahead of Time compilation(**AOT**) vs Just in Time compilation(**JIT**)
+## Ahead of Time compilation(**AOT**) vs Just in Time compilation(**JIT**)
 
 ## AOT
 
@@ -102,6 +102,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Also has to keep information about the method i.e number of times called, arguments, times spent.
 - Warmup time: has to recognize that a method is called a lot and then take time to compile it.
 - JIT is good for programs that run for a long time, background and network servers.
+- e.g Ionmonkey(Mozilla)
 
 ## Profiling
 
@@ -186,3 +187,17 @@ There is a tendency to prefer constructions that are simplest in that language r
   - *T* - a finite set of terminal symbols.
   - *S* - a special goal or start or distinguished symbol.
   - *P* - a finite set of production rules or simply, productions.
+
+## Static Analysis
+
+- This is a way to check your code without running it.
+- How to go about it.
+  - Deciding what you want to check for.
+  - Deciding how exactly to check for it.
+  - Implementation details
+
+### Misc Notes
+
+- Use-after-free errors.
+- Data races - unsynchronized access to shared memory(where at least one is a write).
+- 
