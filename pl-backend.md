@@ -196,8 +196,19 @@ There is a tendency to prefer constructions that are simplest in that language r
   - Deciding how exactly to check for it.
   - Implementation details
 
-### Misc Notes
+### Misc Notes on Rust
 
 - Use-after-free errors.
 - Data races - unsynchronized access to shared memory(where at least one is a write).
-- 
+- Ownership type system == affine or substructural
+- **...placing restrictions on which aliases(references) to an object may be used to mutate it at any given point in the program's execution**
+- rich set of APIs: concurrency abstractions, efficient data structures, memory management.
+- `Iteration invalidation`(usually internally implemented as a pointer) - ds being iterated over is mutated during iteration.
+- GC languages: memory only deallocated when it can no longer be used by the program. Avoid interior pointers (pointers into ds)
+- To make them addressable, they need to be separate objects, references to which can now be strored in the array.
+- Parameters are passed by value but copy are shallow.
+- Memory management is automatic with the rules hence no need for a garbage collector.
+- Mutable references: provide temporary ownership, borrowing
+- Pass by value: Ownership transfer, Passed by Ref: Borrowing for certain lifetime.
+- Shared reference = share read only data between multiple threads, allowed to co exist in same lifetime as long as both are read
+- Double linked list impossible to impelement.
