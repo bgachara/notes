@@ -19,3 +19,7 @@
 - Pattern Recognition - notice similarities, differences, properties or trends in data.
 - Pattern Generalization - define a concept or idea in general terms via doing away with the unnecessary. Abstraction.
 - Algorithm design - repeatable, step-by-step process to solve a particular problem.
+
+## Misc
+
+- Sometimes we find that many questions have a similar structure and are instances of the same problem.

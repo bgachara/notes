@@ -74,7 +74,7 @@
 
 - Buffer Overflows.
 - Out-of-bounds array access.
-- Dangling pointers.
+- Dangling pointers (use after free bugs).
 
 ## Taxonomy of safety violations
 
