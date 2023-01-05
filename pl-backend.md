@@ -106,6 +106,7 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Also has to keep information about the method i.e number of times called, arguments, times spent.
 - Warmup time: has to recognize that a method is called a lot and then take time to compile it.
 - Assumed goal of avoiding premature optimization.
+- Loops and Functions are typical candidates for optimizations.
 - JIT is good for programs that run for a long time, background and network servers.
 - e.g Ionmonkey(Mozilla)
 
