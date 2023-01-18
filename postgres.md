@@ -18,12 +18,16 @@
 - pg_ident.conf
     - if present, this file maps an authenticated OS login to a PostgreSQL user.
 
-```bash
+```sql
 
 Postgres officially refers to users as roles. Not all roles need to have to have login privileges.
 
 Postmaster(represents the postgresql service and affect the whole server) vs User constext.
 
+After postgresql install, you should log in as postgres and create other roles.
+
+create role le login password 'king' createdb;
+create role le login password 'king' superuser;
 ```
 - Settings with user or superuser context can be set for a specific database, user, session and function level.
 - Important Network settings to watch(change requires a server restart):
@@ -36,3 +40,66 @@ Postmaster(represents the postgresql service and affect the whole server) vs Use
     - effective_cache_size
     - work_mem
     - maintenance_Work_mem
+- Creating group roles and add members to it.
+
+## Database Creation
+
+```sql
+
+create database db_name;
+
+```
+- Existence of template databases that act as skeleton for new databases.
+- You can use any database as a template, useful when you want to make replicas.
+- You can make a db as a template after which it is no lonegr editable and deletable.
+
+```sql
+
+create database db_name template template_db_name;
+
+update pg_database set datistemplate = true where datname = 'db_name';
+
+```
+## Schemas
+
+- schemas organize your database into logical groups.
+- schemas created to also house extensions.
+
+## Privileges
+
+- Permissions, this can bored down to row and column level.
+- Types:
+    - Select, Insert, Update, Alter, Execute, Delete and Truncate.
+- Most privileges must have a context.
+- 
+
+## Getting Started
+
+- Should have one superuser whose passwd is known: 'postgres'
+- Postgresql creates one superuser and db at installation both called postgres.
+- Before creating a db, create a role that will own that db
+
+```sql
+
+create role new_role login password 'new_pass';
+
+```
+- Create db and set the owner.
+
+```sql
+
+create database mydb with owner = new_role;
+```
+
+- GRANT command is the primary means to assign privileges.
+- Owner of an object retains all privileges.
+
+```sql
+GRANT some_privilege to some_role;
+
+```
+- Default priviliges.
+
+## Extensions
+
+- add-ons that you can install to extend functionality beyond base offerings.
