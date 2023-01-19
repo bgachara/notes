@@ -43,6 +43,38 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 ### Parts of a compiler
 
+- Scanning/Lexing/Lexical Analysis.
+  - takes in the linear stream of characters and chunks them together into a series of sth akin to "words" also called tokens.
+  - tokens can be single characters or several characters long.
+  - whitespace and comments discarded.
+
+- Parsing.
+  - this is where our syntax gets a grammar, ability to compose larger expressions and statements out of smaller parts.
+  - takes the flat sequence of tokens and builds a tree structure that mirrors the nested nature of the grammar.
+  - this is the parse tree or the abstract syntax tree.
+  - parser's job is to also provide syntax errors.
+
+- Static Analysis.
+  - First 2 stages are pretty much the same across all implementations.
+  - Individual characteristics of a language start coming into play.
+  - Only syntactic structure of the code is known at this stage.
+  - First bit of analysis is `binding` or `resolution`, for-each identifier we find out where that name is defined and we wire them together.
+  - This is where `scope` comes into play.
+  - If the language is statistically typed, this is when we type check.
+  - Once we know where they are declared, we can also figure their types and report a `type error` when declared operations aren't allowed between types.
+  - All semantic insight that is visible to us (gleaned) from analysis needs to be stored somewhere.
+  - They are often stored right back as attributes on the syntax tree itself, in fields left uninitialized during parsing.
+  - Can also be stored in a look-up table off to the side, keys to this table being identifiers(name of vars and declarations): `symbol table`.
+  - Most powerful bookkeeping tool is to transform the tool into an entirely new data structure that more expresses semantics of the code.
+
+- Everything upto here is considered the **Front-end**.
+
+- Intermediate representation(IR)
+  - Compiler can be thought of as a pipeline where the preceding stage organises code in a simpler way for the next stage.
+  - Front end is source language oriented while backend is destination architecture oriented.
+  - In the middle, the code may be stored in some `intermediate representation` that isn't tied to either source or destination forms. IR acts an interface between the two languages.
+  - Lets you support multiple source languages and target platforms with less effort.
+
 - **Front-end** -> deals with the source language.
 / to check syntax the compiler must compare the program's structure against a definition of the language.
 / requires a formal definition, efficient mechanism for testing whether definition is met and how to procede on illegal input.
