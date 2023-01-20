@@ -43,18 +43,18 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 ### Parts of a compiler
 
-- Scanning/Lexing/Lexical Analysis.
+- **Scanning/Lexing/Lexical Analysis**
   - takes in the linear stream of characters and chunks them together into a series of sth akin to "words" also called tokens.
   - tokens can be single characters or several characters long.
   - whitespace and comments discarded.
 
-- Parsing.
+- **Parsing**
   - this is where our syntax gets a grammar, ability to compose larger expressions and statements out of smaller parts.
   - takes the flat sequence of tokens and builds a tree structure that mirrors the nested nature of the grammar.
   - this is the parse tree or the abstract syntax tree.
   - parser's job is to also provide syntax errors.
 
-- Static Analysis.
+- **Static Analysis**
   - First 2 stages are pretty much the same across all implementations.
   - Individual characteristics of a language start coming into play.
   - Only syntactic structure of the code is known at this stage.
@@ -69,11 +69,69 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 - Everything upto here is considered the **Front-end**.
 
-- Intermediate representation(IR)
+- **Intermediate representation(IR)**
   - Compiler can be thought of as a pipeline where the preceding stage organises code in a simpler way for the next stage.
   - Front end is source language oriented while backend is destination architecture oriented.
   - In the middle, the code may be stored in some `intermediate representation` that isn't tied to either source or destination forms. IR acts an interface between the two languages.
   - Lets you support multiple source languages and target platforms with less effort.
+
+- **Optimization**
+  - Once we understand what the user's program means, we are free to swap it out with a different program that has the same semantics but implements them more efficiently, we optimize it.
+  - Simple example is `constant folding`. If some expression always evaluates to the exact same value, we can do the evaluation at compile time and replace the code for the expression with its result.
+  - Optimization is a huge part of the pl business.
+  - `constant propagation`,` common subexpression elimination`, `loop invariant code motion`,`global value numbering`,`strength reduction`,`scalar elimination of aggregates`.
+
+- **Code Generation**
+  - Conversion into form that the machine can actually run.
+  - Primitive assembly like instructions a CPU runs.
+  - Decision:: Do we generate instructions for a real CPU or a virtual one???
+  - Native code is lightning fast but generating it is alot of work.
+  - Today's archs have piles of instructions, complex pipelines and lots of historical baggage.
+  - Compiler can easily get bogged down in chip's arch leading to lack of portability.
+  - Martin Richards and Niklaus Wirth of BCPL and Pascal fame made their compilers produce virtual machine code.
+  - Instead of instructions for some real chip, they produced code for hypothetical, idealized machine.
+  - Called `p-code` for portable but referred to as **bytecode** as each instruction is often a single byte long.
+  - Can be thought of as a dense binary encoding of the language's low-level operations.
+  - The further down the pipeline you push the architecture specific work, the easier it is to share earlier phases across architectures.
+  - Optimizations like register allocation and instruction selection work best when they know the strengths and capabilities of a specific chip.
+  - Figuring out which parts of the compiler to share and which are target-specific is an art.
+
+- **Virtual Machine**
+  - Once bytecode is generated, one needs to translate as it can not be executed.
+  - Implement a mini-compiler for each architecture that converts the bytecode to native for that machine code.
+  - Relatively simple here as you can reuse the rest of the pipeline, bytecode here acts as a IR.
+  - Also implement a vm, a program that emulates a hypothetical chip supporting your virtual arch at runtime.
+  - Running bytecode in a VM is slower than translating it to native code aot because every instruction must be simulated at runtime each time it executes.
+  - In return you get simplicity and portability.
+  - Implement your Vm in C and you can run your language on any platform that has a C compiler.
+
+- **Runtimes**
+  - If compiles to machine code, we can tell OS to load the executable and off it goes.
+  - If compiled to bytecode, we start up Vm and load program into it.
+  - In both cases, other language services needed while program is running are provided i.e garbage collection, instance-of tests.
+  - In a fully compiled language,the code implementing the runtime gets inserted directly into the resulting executable.
+
+- Shortcuts and Alternate Routes
+  - `other techniques used as opposed to the long path described above`
+  
+  - Single-pass compilers
+    - Some simple compilers interleave parsing, analysis and code generation so that they produce output code directly in the parser without allocating syntax trees or other IRs.
+    - These single passes restrict the design of the language as no intermediate data structures to store global information and can't revisit any previously parsed of the code.
+    - Pascal and C designed around this limitation.
+  
+  - Tree-walk interpreters
+    - PLangs start executing code right after parsing it to an AST with static analysis applied.
+    - Execution is through traversing the syntax tree one branch and leaf at a time, evaluating each node as it goes.
+    - common for student projects and little languages.
+  
+  - Transpilers
+    - Treat some other source language as if it was an IR.
+    - Source-to-source compiler or a transcompiler.
+  
+  - Just-in-time compilation
+    - Reserved for experts.
+    - Compile it for the architecture at hand.
+    - Use profiling hooks.
 
 - **Front-end** -> deals with the source language.
 / to check syntax the compiler must compare the program's structure against a definition of the language.
