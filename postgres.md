@@ -44,6 +44,10 @@ create role le login password 'king' superuser;
 
 ## Database Creation
 
+- Postgres uses a client/server model.
+    - server process(postgres): manages the db files, accepts connections, perform db actions.
+    - client process: app that wants to perform db actions.
+- They can be on different hosts and communicate over a tcp/ip network. 
 ```sql
 
 create database db_name;

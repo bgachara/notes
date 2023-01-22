@@ -98,12 +98,22 @@ There is a tendency to prefer constructions that are simplest in that language r
 
 - **Virtual Machine**
   - Once bytecode is generated, one needs to translate as it can not be executed.
+  - They are Vms because they permit step-by-step execution of programs.
+  - They are virtual as they are not implemented in h/w and omit lots of real h/w machine details.
   - Implement a mini-compiler for each architecture that converts the bytecode to native for that machine code.
   - Relatively simple here as you can reuse the rest of the pipeline, bytecode here acts as a IR.
   - Also implement a vm, a program that emulates a hypothetical chip supporting your virtual arch at runtime.
-  - Running bytecode in a VM is slower than translating it to native code aot because every instruction must be simulated at runtime each time it executes.
+  - Running bytecode in a VM is slower than translating to native code aot because every instruction must be simulated at runtime each time it executes(implementation overhead).
   - In return you get simplicity and portability.
   - Implement your Vm in C and you can run your language on any platform that has a C compiler.
+  - Easier to be formally proven correct.
+  - Easy to implement profiling and debugging.
+  - Desing choices to made.
+  - Components
+    - Program store.
+    - Execution state.
+    - Runtime system component: memory allocator / garbage collector.
+  
 
 - **Runtimes**
   - If compiles to machine code, we can tell OS to load the executable and off it goes.
