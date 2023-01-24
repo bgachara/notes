@@ -318,5 +318,3 @@ There is a tendency to prefer constructions that are simplest in that language r
 - Pass by value: Ownership transfer, Passed by Ref: Borrowing for certain lifetime.
 - Shared reference = share read only data between multiple threads, allowed to co exist in same lifetime as long as both are read
 - Double linked list impossible to impelement.
-
-## Virtual Machines

@@ -88,6 +88,7 @@
 ```eng
 
 **Defn:**
+
 A toolchain is a set of tools that are used in a chain with the purpose of compiling and running code written in
 a specific programming language.
 
@@ -99,6 +100,11 @@ The C toolchain is a toolchain because in addition to the compiler, you also nee
 
 - Programming Languages should aid in program design, documentation and debugging.
 
+- Types are the central organizing principle of the theory of pl, language features are manifestations of type structure.
+
+- The syntax of a language is governed by the constructs that define its types and semantics by the interactions among those constructs.
+
+- The concept of safety emerges as the coherence of the statics and dynamics of a language.
 
 ```eng
 
@@ -121,3 +127,13 @@ Ideally those features should not intefere with one another or hedged out via in
 Imperative - sequence of statements that represent commands.
 
 - *What is hidden control flow*
+
+## Data models
+
+- Each pl has its own data model and these differ from one another.
+- The basic principle under which most pl deal with data is that each program has access to "boxes" which we can think of as regions of storage.
+- Each box has a type...int, char.
+- We may store in that box any value of the correct type for that box, data objects.
+- We may also name boxes, any expression that denotes that box.
+- Operations on data include arithmetic, accessing elements, dereferencing.
+- 
