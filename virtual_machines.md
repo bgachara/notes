@@ -39,6 +39,46 @@
   - Android Java Vm: Dalvik(interpreter and just-in-time compiler), Android RunTime(ART)(Ahead-of-Time).
   - Apache Harmony
 
+## Core components
+
+- Loader and Dynamic Linker
+  - load application package into memor, parse package into data structures and load additional resources needed by the application.
+  - data structures in memory have semantic meaning such as code and data.
+  - reflection data or metadata is produced at load time that help vm understand application.
+  - dynamic linker resolves all referenced symbols into accessible memory addresses, may trigger loader to load more data and code.
+
+- Execution engine
+  - performs the operations specified by the code and is the core component of the virtual machine.
+
+- Memory manager
+  - manage its data and the memory containing the data.
+  - can be categorised by visibility to the application:
+    - Virtual machine data: 
+      - Vm needs memory to load application code and hold supporting data.
+      - Data here is invisible to the application and necessary for the application execution.
+    - Application data: 
+      - Application needs storage for its static and dynamic data.
+      - Visible to the application.
+      - Dynamic data stored in the application heap.
+  - Memory manager usually manages only the application data leaving the virtual machine data to internal or underlying system.
+
+- Thread Scheduler
+  - allows system to have multiple control flows.
+  - straightforward way to provide multitasking, parallelization, and event co-ordination.
+  - garbage collection helps execution engine use RAM resource whereas thread scheduler helps use the processor resource.
+
+- Language Extension
+  - Safe or High-level language depend on the vm to access low-level resources due to safety requirements.
+  - Provided through:
+    - Runtime services: 
+      - profiling, debugging, exception/signal handling and interoperability.
+      - can be provided via a client/server arch.
+      - APIs, runtime objects, environment variables.
+    - Language extension: 
+      - runtime services may not be flexible enough and usually limited to specific features defined by the language spec and its execution model.
+      - Foreign Function Interface can extend capabilities beyond current language spec and execution model.
+      - Code can be inlined or embedded in the host language or invoked via a well wrapped function interface, object, module or class.
+      - C the most popular foreign language due to its low-level nature.
 ## Notes
 
 - Many virtual machines designs crossing boundaries.
