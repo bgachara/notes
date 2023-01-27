@@ -79,6 +79,44 @@
       - Foreign Function Interface can extend capabilities beyond current language spec and execution model.
       - Code can be inlined or embedded in the host language or invoked via a well wrapped function interface, object, module or class.
       - C the most popular foreign language due to its low-level nature.
+
+## Virtual ISA
+
+- Virtual language is used as the compilation target of other language.
+- Mostly used for intermediate representation purpose, hence not exactly readable.
+- i.e Java bytecode, LLVM bitcode, ParrotVM bytecode.
+- Assembly language may also be counted here.
+- Virtual ISA is a kind of virtual language that defines the instruction set and execution model of a virtual machine.
+
+## Data Structures in VMs
+
+- Core data structures: Object, Class and Virtual Function Table.
+- It has two kinds of data types
+  - Primitive types - hold a direct value, number, boolean, return address.
+  - Reference types - hold a pointer to an object, which is a instance of reference type such as class or an array. 
+- A class defines two parts of data:
+  - Instance data - owned by every object individually, including object fields and virtual methods
+  - Class data - shared by all instances of same class, static fields and static methods.
+- Sample method description
+
+```c
+
+````
+
+## Design of the Execution Engine
+
+- Core component of the virtual machine and rest of components are supportive to the execution engine.
+- Design of the execution engine largely dictates the design of a VM.
+- Basic execution mechanisms are interpretation and compilation.
+
+```bash
+
+  Assuming a program P written in language L is compiled to machine code C,
+  compile-time refers to the time when program P is compiled from L to C,
+  and runtime refers to the time progam P is executed in the form of C
+
+```
+
 ## Notes
 
 - Many virtual machines designs crossing boundaries.
