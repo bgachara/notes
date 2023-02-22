@@ -70,3 +70,19 @@
 - **Virtual Memory**:
   - This is an abstraction over physical memory, which helps distribute it between programs in a safe and effective way.
   - Also isolates programs from one another.
+
+
+### Unix
+
+- Unix postulates that everything is a file in the sense that looks like a stream of bytes.
+- Abstract things like:
+  - data access on a hard drive/ssd.
+  - data exchange between programs.
+  - interaction with external devices.
+- OS purpose is to abstract and manage resources via a set of routines to handle communication with devices, files, programs.
+- A programs cannot bypass the OS and interact with resources directly.
+- Communication happens via *system calls* provided to user applications.
+- Unix identifies a file with its descriptor as soon as it is opened by a program...this is nothing but an integer value.
+- File is opened by invoking the open system call however 3 other files opened stdin, stdout, stderror. 0, 1, 2.
+- Write system call invoked for stdout - writes a given amount of bytes from memory starting at a given address to a file with a given descriptor
+
