@@ -18,6 +18,11 @@
 - Evaluating, estimating and predicting performance.
 - Performance considerations and targets have their place at the design stage jsut like other design goals.
 - Do not optimize prematurely and don't pessimize intentionally either.
+- Program profiling and measurement to see where resources such as time and memory are used and modified to improve these resources.
+- After all reasonable programmer mods have been made, further improv can only come from how well instructions are translated into instructions for the target machine.
+- The compiler must try to compensate for unbalanced computer systems: speed of the processor, speed of memory system, speed of i/o system.
+- PROCESSORS ARE MUCH FASTER THAN MEMORY SYSTEMS.
+- Compilers must generate code that uses memory less by using registers or maximising memory cache
 
 ### Learning list for high-perfomance programs
 
