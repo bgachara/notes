@@ -130,3 +130,30 @@
 
 - Has the terminal standard input and standard output.
 
+
+## System calls
+
+- Mechanics of issuing them are highly machine dependent and are often expressed in assembly language
+- Procedure library provided to aid in this regard.
+- Programs always check results of a system call to see if an error occurred.
+- System calls happen in a series of steps.
+- POSIX system call standard.
+- execve system call.
+- Processes in Unix have memory divided in 3 segments: text, data, stack.
+- Types: 
+    - system calls for process management
+    - system calls for file management.
+    - system calls for directory management
+- Windows 32 API 
+
+## Operating system structure.
+
+- Monolithic systems
+- Layered systems.
+- Microkernels.
+- Client-server systems.
+- Virtual machines.
+- Exokernels.
+
+## Process Deep Dive
+
