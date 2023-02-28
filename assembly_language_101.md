@@ -55,3 +55,16 @@
       - DIV
       - IMUL
       - IDIV
+
+- Comparing Operands
+      - CMP
+
+- Conditional branches
+      - JCC 
+      - Instructions that conditionally branch to a specified address based on some conditions.
+      - Jcc is a generic name and has various variants that all test different set of flag various.
+
+- Function calls.
+      - CALL - calls a function - pushed current instruction pointer onto the stack and jumps to the specified address.
+      - RET - returns to the caller - pops instruction pushed onto stack and resumes execution from that address also can increment ESP by specific no of bytes after popping.
+      - function address can be specified just like any other operand, as an immediate, register or memory address.

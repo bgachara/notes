@@ -1,6 +1,7 @@
 # Operating Systems
 
 `Notes from Modern operating systems by Tanenbaum`
+`Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
 
 ## Introduction
 
@@ -157,3 +158,7 @@
 
 ## Process Deep Dive
 
+
+## Windows Fundamentals
+
+- 
