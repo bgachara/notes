@@ -35,6 +35,12 @@ A.N Whitehead
 
 ## Implementation Patterns
 
+- Each pattern has 4 parts
+    - Purpose
+    - Discusssion
+    - Implementation
+    - Related Patterns
+    
 - Parsing Input Sentences.
     - Mapping Grammars to Recursive Descent Recongizers.
     - LL(1) Recursive Descent Lexer.

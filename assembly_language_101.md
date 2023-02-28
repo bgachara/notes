@@ -40,6 +40,30 @@
 
 > There exists some difference between the Intel notation and the AT&T notation
 
+## Advantages of learning Assembly Language
+
+- Better understanding of Architecture Issues
+      - basic instruction set.
+      - processor registers
+      - memory addressing
+      - hardware interfacing
+      - input / output
+- Understanding Toolchain
+      - process of taking code written and converting it to machine executable format.
+      - includes the compiler, assembler, linker, loader and debugger.
+- Improve algorithm development skills
+      - practice with a more explicit language hence better expression of ideas needed
+- Improve understanding of functions/ procedures
+      - understand how they work.
+      - contents and structure of the function call frame i.e activation record.
+      - understand recursive functions
+- Understanding of I/O buffering
+- Understand compiler scope
+      - understand scope and capabilities of the compiler
+- Introduce multiprocess concepts
+      - shared memory, threaded processing.
+- Introduction of Interrupt processing concepts.
+      - interrupt handling, interrupt service handling, vector interrupts.
 
 ## Basic Instructions
 
