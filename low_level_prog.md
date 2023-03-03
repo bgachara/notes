@@ -40,7 +40,8 @@
     - Names can be r1,r2,r3 ..... r15, represent meaning they bear for some special instruction i.e rc1 - cycle, rcx - cycle counter, rax- accumulator
     - *registers do not have addresses as they are implemented differently to main memory*
     - Some registers have system wide importance hence only modified by the OS. i.e rip register - stores address of next instruction. rflags - current program state.
-    - Registers for floating point numbers or specialised parallel instructions. i.e multimedia xmm0 - xmm15.
+    - Registers for floating point numbers and specialised parallel instructions(SIMD). i.e multimedia xmm0 - xmm15.
+    - SIMD(Single Instruction Multiple Data) allow a single instruction to be applied simultaneously to multiple data items.
   - System registers
     - designed to be used specifically by the OS.
     - They don't hold values in computations instead store information required by system-wide data structures.

@@ -6,6 +6,7 @@
 `Write memory corruption exploits`
 `New h/w security often comes in the form of assembly instructions that need to be adopted`
 
+
 ## Introduction
 
 - Called x86 because of the progression of Intel chips, 8086, 80186, 80286.
@@ -25,6 +26,7 @@
     - register name - to read from or written from. 
     - immediate - constant value embedded in the code.
     - memory address - hard-coded or offset calculated.
+
 
 ```asm
 
@@ -48,22 +50,31 @@
       - memory addressing
       - hardware interfacing
       - input / output
+
 - Understanding Toolchain
       - process of taking code written and converting it to machine executable format.
       - includes the compiler, assembler, linker, loader and debugger.
+
 - Improve algorithm development skills
       - practice with a more explicit language hence better expression of ideas needed
+
 - Improve understanding of functions/ procedures
       - understand how they work.
       - contents and structure of the function call frame i.e activation record.
       - understand recursive functions
+
 - Understanding of I/O buffering
+
 - Understand compiler scope
       - understand scope and capabilities of the compiler
+
 - Introduce multiprocess concepts
       - shared memory, threaded processing.
+
 - Introduction of Interrupt processing concepts.
       - interrupt handling, interrupt service handling, vector interrupts.
+
+- Understanding how a compiler implements features of a high level language can aid in efficiency features selection.
 
 ## Basic Instructions
 
@@ -92,3 +103,25 @@
       - CALL - calls a function - pushed current instruction pointer onto the stack and jumps to the specified address.
       - RET - returns to the caller - pops instruction pushed onto stack and resumes execution from that address also can increment ESP by specific no of bytes after popping.
       - function address can be specified just like any other operand, as an immediate, register or memory address.
+
+## Program Format
+
+- A properly formatted assembly source file consists
+      - Data section where initialized data is declared and defined.
+      - BSS section where uninitialized data is declared.
+      - Text section where code is placed.
+- The semicolon(;) is used to note program comments.
+- Numerical values can be specified in decimal, hex or octal i.e Ox7f, 777q.
+- Constants are defined with equ <name> equ <value>
+- Data section
+      - initialized data declared here.
+      - <variableName>  <dataType>  <intialValue>
+      - declaration: dw, db, dd, dq, ddq, dt.
+- BSS section
+      - uninitilized data
+      - <variableName> <resType> <count>
+- Text section
+      - code placed here.
+      - specified one per line and must be valid with operands and all
+      - include some headers or labels that define the initial program entry.
+      - system service should be used to inform OS that the program should be terminated.
