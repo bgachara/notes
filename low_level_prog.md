@@ -72,6 +72,26 @@
   - This is an abstraction over physical memory, which helps distribute it between programs in a safe and effective way.
   - Also isolates programs from one another.
 
+```eng
+
+- Parallelism will be key and exploitation of locality of data.
+- CPU speeds increased faster than memory speeds.
+- Memory keeps getting further with the introduction of new levels of caches.
+ 
+- CPUs with caches...as transistor density increased, cache capabilities were integrated onto CPUs.
+- GPUs grew out of need to provide hardware support for displays as use of graphics use grew.
+- GPU speed also increase faster tha memory speed.
+- GPU also integrated onto CPUs as transistor density increased.
+- NIC(Network Integration Controller) capabilities also integrated onto CPUs.
+
+- Work/Time = Work/Instructions(Path Length) * Instruction/Cycle(IPC) * Cycle/Time(Frequency)
+- Better Algorithm - Same work with fewer instructions
+- Compiler can optimize for fewer instructions, choose those with better IPC.
+- Cache efficient algorithms: Higher IPC.
+- Vectorization: same work with fewer instructions.
+- Parallelization: more instructions per cycle.
+
+```
 
 ### Unix
 
