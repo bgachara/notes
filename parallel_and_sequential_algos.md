@@ -1,2 +1,0 @@
-# Parallel and Sequential Algorithms
-

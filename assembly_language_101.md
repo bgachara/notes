@@ -206,6 +206,7 @@
             - iteration: basic loop can be implemented by a counter cehcked at the bottom or top of a loop with a compare or conditional loop.
             - loop instruction available: loop <label>
 
+
 ## Addressing modes
 
 - The addressing modes are the supported methods for accessing a value in memory using the address of a data item being accessed.
@@ -217,5 +218,116 @@
             - operand is an immediate value
       - Memory
             - operand is a location in memory(accessed via an address), indirection or deferencing.
-- On a 64bit arch , addresses require 64-bits. Use [] to access memory 
+- On a 64bit arch , addresses require 64-bits. Use [] to access memory.
+
+
+## Process Stack
+
+- A stack is a type of data structure where items are added and then removed from the stack in reverse order. LIFO
+- Heavily used for storage of information during procedure or function calls.
+- Push and Pop operations. push <operand64> pop <operand64> operand can be register or memory not an immediate.
+- Stack is implemented in reverse in memory.
+- Stack starts in high memory and grows downward.
+- Temporary store information such as call frames for function calls.
+- Heap and stack grow towards each other, program carsh if they ever meet.
+- Basic ops of push and pop adjust stack register pointer *rsp* during their operation.
+
+
+## Program development
+
+- Main steps:
+      - Understand the problem.
+            - understand what is required esp input information and expected results or output.
+      - Create the algorithm
+            - Steps to solve problem once understood.
+      - Implement the program.
+      - Test/Debug the program.
+
+- Error Terminology
+      - Assembler error
+      - Run-time error
+      - Logic error
+
+
+## Macros
+
+- Set of instructions that can be inserted wherever needed.
+- Useful when the same set of code must be utilised numerous times.
+- Should be placed on the source file before the data and code sections.
+- Can either be single-line macros or multi-line macros.
+
+
+## Functions
+
+- Functions and procedures help break-up a program into smaller parts making it easier to code,debug and maintain.
+- They involve two main actions:
+      - Linkage - since can be called from multiple places, must be able to return to the correct place it was originally called.
+      - Argument Transmission - must be able to access parameters to operate on or to return results.
+- Non-static local variables declared in a function are stack dynamic local variables by default.
+- Statically declared variables are assigned memory locations for the entire execution of the program...no runtime overhead though.
+- Function declaration:
+      global <procName>
+      <procName>:
+            ;function body
+      ret
+- Standard calling convention
+- Linkage:
+      - about getting to and from a function call correctly.
+      - Two instructions: call <funcName> and ret
+      - call saves address of where to return to when function completes, placing rip onto the stack.
+      - ret pops the current top of the stack(rsp) into the rip. thus address restored.
+- Argument transmission:
+      - sending info to a function and obtaining a result as appropriate for the specific function.
+      - transmission by value = call-by-value.
+      - transmission by address = call-by-reference.
+      - can either be via:
+            - placing values in register.
+            - globally defined variables.
+            - putting values and/or addresses on stack.
+- Calling convention
+      - general idea is program state(specific registers, stack) is saved, function executed then state is restored.
+      - prologue: helps save the state.
+      - epilogue: restores the state
+- Parameter passing
+      - combo of registers and the stack is used to pass params to and from a function.
+      - first six in register and other via the stack.
+      - for fp args, xmm0-xmm7.
+- Register usage
+      - some regs are exected to be preserved across a function call.
+- Call frame
+      - Items on the stack as part of a function call are referred to as call frame..activation record or call stack.
+      - Include; 
+            - Return address
+            - Preserved registers
+            - Passed arguments.
+            - Stack dynamic local variable
+- Caller
+- Callee
+
+## System services
+
+- Console output, keyboard input, file services, time/date, requesting memory...services apps need from operating services.
+- System interface is the interface between an executing process and the operating system.
+- Calling system services;
+      - logically similar to calling a function, where function code is located within the operating system.
+      - when calling system services , arguments are placed in standard argument registers.
+      - system services dont typically use stack-based arguments.
+      - system service code is placed in rax register, number assigned to specific sysserv being requested.
+      - codes can not be changed by application programs.
+      - After the system code and arguments are set, the syscall instruction is executed.
+      - The syscall instruction will pause the current process and transfer control to the operating system which will perfrom instruction in rax register.
+- i.e Newline character, console output, console input, file open ops.
+
+/*more to be updates here*/
+
+
+## Multiple source files
+
 - 
+
+## Stack Buffer Overflow
+
+- A stack buffer overflow can occur when a program overflows a stack-based dynamic variable.(see stack-based local variables)
+- Cause program bugs or even crash the program.
+- Overwritten will be variables, preserved registers, frame pointer, return address, stack-based parameters.
+- Stack Smashing  
