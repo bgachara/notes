@@ -2,6 +2,29 @@
 
 `Any problem in computer science can be solved using indirection`
 
+## Introduction
+
+- Algorithms are well-defined procedures for solving problems.
+- Reason for using DSA
+  - Efficiency
+  - Abstraction
+  - Reusability
+
+
+## General approaches in Algo Design
+
+- Randomized algorithms
+  - rely on the statistical properties of random numbers.
+- Divide and conquer algorithms
+  - rely on divide, conquer and combine.
+- Dynamic programming solutions
+  - subproblems are not independent of one another.
+- Greedy algorithms
+  - make decisions that look best at the moment, locally optimal in the hope that they will lead to globally optimal solutions.
+- Approximation algorithms
+  - do not compute optimal solutions, just solutions that are good enough, computationally expensive problems
+
+
 ## Design and Analysis of Algorithms.
 
 - Algorithm design techniques.
