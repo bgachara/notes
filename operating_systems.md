@@ -156,6 +156,14 @@
 - Virtual machines.
 - Exokernels.
 
+## Device drivers
+
+- They are distinct black boxes that make a particular piece of hardware respond to a well-defined internal programming interface,
+   hiding completely the details of how the device works
+- User activities are performed by means of a set of standardized calls that are independent of the specific driver,
+  mapping those calls to device-specific operations that act on real hardware is then the role of the device driver.
+- 
+
 ## Process Deep Dive
 
 
