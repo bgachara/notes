@@ -43,6 +43,23 @@
 - Pattern Generalization - define a concept or idea in general terms via doing away with the unnecessary. Abstraction.
 - Algorithm design - repeatable, step-by-step process to solve a particular problem.
 
+> A procedure that  has all the characteristics  of an algorithm except that it possibly lacks finiteness may be called a computational method.
+
+## Important features
+
+- Finiteness - algorithm must always terminate after a finite number of steps.
+- Definiteness - Each step must be precisely defined, actions must be rigorously and unambiguously specified for each case. Programming languages used to achieve this.
+- Input - has zero or more inputs. Given as algo begins or dynamically as it runs.
+- Outputs - zero or more quantities that have a relation to the inputs.
+- Effectiveness - operations must be sufficiently basic
+
+### Algorithmic Analysis
+
+- Length of time taken to perform the algorithm.
+- Adaptability of algorithm to different kind of computers.
+- Quantitative behaviour of algorithms.
+- 
+
 ## Misc
 
 - Sometimes we find that many questions have a similar structure and are instances of the same problem.
