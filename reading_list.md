@@ -16,7 +16,7 @@
 - Write Great Code series
 - The secret life of strings
 - Low level programming
-- 
+- How Computers really work
 
 : Operating System
 

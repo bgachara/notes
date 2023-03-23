@@ -21,6 +21,37 @@
 - Assembly Language for a chosen processor is a pl consisting of mnemonics for each possible binary encoded instruction(machine code).
 - An architecture does not always define a precise instruction set unlike a model of computation.
 
+
+### Introduction 2(Electronics)
+
+- Electric charge - causes matter to experience a force - Coulombs
+- Electric current - Flow of charge - Amps
+- Voltage - electric potential difference between two points, voltage increases current, current pressure - Volts
+- Resistance - Difficulty of current flow through a material - Ohms
+
+- One Amp corresponds to one coulomb per second.
+- Ohms Law - Current flowing from one point to another is equal to voltage across the points divided by the resistance between them. I =V/R.
+- AC vs DC
+- Kirchhoff's Voltage Law - Sum of volatages around a circuit is zero.
+- Resistance serially connected , total resistance is just the sum.
+- Light Emitting Diodes (LED) - lights up when current flows via it.
+- Diode - electronic component that allows current to flow through it in one direction, low resistance in one direction(allow) and high in the other(impede)
+- Forward voltage - voltage amount dropped across LED when current flows through it.
+- Transistor - device used to switch or amplify current.
+- Types: BJTs - Bipolar Junction Transistor, FETs - Field Effective Transistors.
+- BJTs have three terminals: base, collector and emitter.
+- Two types of BJTs: NPN and PNP. Differ in how they respond when current is applied at base terminal.
+- NPN - applying a small current at the base allows a larger current to flow from the collector to the emitter.
+
+- Logic gates - circuit elements that implement logical functions where inputs and outputs are high and low voltages.
+- Combinational Logic circuit - combine logic gates in such a way that output is a function of the present inputs.
+- Sequential logic - output is a function of both present and past inputs.
+- Integrated circuits 
+- Ics in Dual in-line package
+- Resistor-Transistor Logic circuits, Diode-Transistor Logic, Transistor-transistor Logic
+- Pinout diagram.
+-  
+
 ### Von Neumann Arch Extensions
 
 - **Registers**: 

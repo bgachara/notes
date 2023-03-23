@@ -32,7 +32,9 @@
 > The neural network abstraction can be viewed as a modular approach of enabling learning algorithms that are based on continous optimization on a 
   computational graph of dependencies between inputs and outputs.
   
-> 
+> Transformers enabled a rapid scaling up of the complexity of language models by increasing the number of parameters in the model, as well as other factors.
+  The parameters can be thought of as connections between words, and models improve by adjusting these connections as they churn through text during training.
+  The more parameters in a model, the more accurately it can make connections, and the closer it comes to passably mimicking human language.
 
 ## Building Blocks
 
