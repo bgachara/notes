@@ -2,6 +2,7 @@
 
 `Notes from Introduction to 64bit Intel Assembly Language Processing for Linux`
 `Also Assembly 64`
+`Assembly programming with ARM on FreecodeCamp`
 
 
 `Human readable machine code`
@@ -51,7 +52,7 @@
 - Better understanding of Architecture Issues
       - basic instruction set.
       - processor registers
-      - memory addressing
+      - memory addressing modes.
       - hardware interfacing
       - input / output
 
@@ -197,7 +198,7 @@
             - division by zero will crash a program                                                
       - Logical Instructions
             - and, or, xor
-            - shift ops - isolate subset of bits, mult or div by powers of 2. logical shift, arithmetic shift,
+            - shift ops - isolate subset of bits, mult or div by powers of 2. logical shift(left, mult by 2, right, divide by 2), arithmetic shift,
             - rotate operations
       - Control Instructions
             - structures such as IF statements and looping.
