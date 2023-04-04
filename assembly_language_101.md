@@ -10,10 +10,12 @@
 `Its essential to reverse engineering both malicious and bening programs`
 `Write memory corruption exploits`
 `New h/w security often comes in the form of assembly instructions that need to be adopted`
-
+`Understand limitations of conventional architectures`
+``
 
 ## Introduction
 
+- Machine dependent as used only with a specific type of processor.
 - Called x86 because of the progression of Intel chips, 8086, 80186, 80286.
 - Originally 16-bit architecture, later evolved to 32 and 64 bit but kept backwards compatibility.
 - H/w starts at 16 bit and transitions it to 32 and 64 bit.
@@ -381,4 +383,82 @@
             - Jump to ISR
             - Suspension Execute ISR
             - Resumption
-             
+ 
+
+
+## RISC Arch
+
+- Design philosophy aimed at delivering simple but powerful instructions that execute within a single cycle at a high clock speed.
+- Reduce the complexity of instructions performed by the h/w because it is easier to provide greater flexibility and intelligence in s/w than h/w.
+- RISC design places greater demand on the compiler.
+- CISC in contrast relies more on h/w for instruction functionality.
+- Major design rules:
+      - Instructions
+             RISC have reduced number of instruction classes.
+             Classses provide simple operations that can execute in a single cycle.
+             Complicated operations are synthesized from simple instructions
+             Each instruction is of fixed length to allow for fetching future instructs before decoding of current one.
+             CISC instructs are often of variable size and take many cycles to execute.
+      - Pipelines
+             Processing of instructions is broken down into smaller units that can be executed in parallel by pipelines.
+             Ideally pipeline advances by one step on each cycle for maximum throughput, decoded too in one pipeline stage.
+             CISC processors use microcode to aid in decoding.
+      - Registers
+             RISC machines have a large general-purpose regiser set.
+             Any register can contain either data or an address.
+             Registers act the fast local memory store for all data processing operations
+             CISC on the other hand have dedicated registers for specific purposes.
+      - Load-store architectures
+             Processor operates on data held in registers
+             Separate load and store instructions transfer data between register bank and external memory.
+             Memory access are costly, so separating memory access from data processing provides an advantage as one can use data in register bank without going to memory
+             CISC in contrast access memory directly.
+- These rules allow RISC to be simpler and thus core can operate at higher clock frequencies as opposed to CISC complex and operate at lowerclock frequencies.
+- RISC and CISC blurred over the years as design rules borrowed.
+
+
+## ARM Design Philosophy
+
+- Number of physical features that have driven the ARM processor design
+      - Battery power
+      - High code density
+      - Price sensitive
+      - Area size on the processor die
+      - H/w debug technology
+- ARM is not a pure RISC technology due to the constraints of its primary application.
+- ARM differs from RISC in embedded apps specific ways
+      - Variable cycle execution for certain instructions
+      - Inline barrel shifter leading to more complex instructions
+      - Thumb 16 bit instruction set
+      - Conditional execution
+      - Enhanced instructions
+- ARM bus technology
+      - bus master and bus slaves
+- Memory width is the number of bits the memory returns on each access, this has a direct effect on overall performance and cost ratio.
+- Types: 
+      - Read Only Memory(ROM) - boot code.
+      - Flash ROM - Firmware, long term data
+      - Dynamic RAM - most common ram, cheapest cose per byte.
+      - Static RAM - Fast memory and caches. more expensive
+      - Synchronous Dynamic RAM.
+- Memory controllers
+- Interrupt controllers
+      - Standard
+      - Vector
+- 
+
+### Glossary
+
+- PCB - printed circuit board
+- SoC - combination of processors, memory and graphics chips
+- UARTs - universal asynchronous receiver and transmitter   
+- Simple processors + timers or UARTs = microcontrollers.
+- Thumb - new, compressed instruction set to increase performance in embedded systems.
+- ASIC - application specific integrated circuits
+- Cortex-A, Cortex-R, Cortex-M
+- FPGA - 
+- Sign magnitude
+- One's complement
+- Two's complement
+- Floating-point numbers: exponent, fraction(lower 23 bits of the format), sign bit, bias.
+-     
