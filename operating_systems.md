@@ -15,12 +15,14 @@
     - Second one is using abstractions to solve the problem at hand.
 - One abstraction every computer user understands is the file.
 - The job of the OS is to create good abstractions and then implement and manage the abstract objects thus created.
+- The trick in resolving tension between simple and complex interfaces is rely on mechanisms that can be combined to provide generality.
 - Abstraction provider definition the OS can be thought of as the top-down view and alternative bottom-up view would be of resource manager.
 - Resource management includes multiplexing(sharing) resources in two different ways: in time and in space.
 - Spooling(Simultaneous Peripheral Operation On Line)
 - Multics(Multiplexed Information and Computing Service)
 - Unix
 - Posix - standard of Unix that defines a minimum system call interface that conformant Unix systems must support.
+
 
 ## Computer Hardware
 
@@ -170,3 +172,17 @@
 ## Windows Fundamentals
 
 - 
+
+## xv6 
+
+- Provides basic interfaces introduced by Ken Thompson and Ritchie Unix and well as mimicking Unix internal design.
+- Unix provides a narrow interface whose mechanisms combine well, offering a surprising degree of generality.
+- An xv6 process consists of user-space memory(instructions, data, stack) and per process state private to the kernel.
+- pid assciated with each process.
+- fork() creates new processes.
+- OS interfaces
+  - processes and memory
+  - i/o and file descriptors
+  - pipes
+  - file system
+  - 
