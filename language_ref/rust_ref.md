@@ -11,6 +11,8 @@
 
 ## Rust Toolchain
 
+*a toolchain is a combo of a release channel and a host and optionally also has an assoiated archive date*
+
 - **rustc** - is the rust compiler.
 - **rustup** 
     - manages rust version, installs compiler, cargo, std lib and other core tools.
@@ -22,14 +24,16 @@
     - i.e compiles code, download and compile dependent libraries, linking libraries and building development and release binaries.
     - Also performs incremental builds of code to reduce compilation time as programs evolve.
     - Also guides idiomatic project structure.
-    - Manage external dependencies, Debugging, Testing, Generate documentation and release management.
+    - Integrated toolchain for creating and building projects, manage external dependencies, Debugging, Testing, Generate documentation and release management.
 
+- Binary types: standalone executables, static libraries and dynamic libraries.
 - Release channels: nightly, beta and stable channel.
 - With Cargo, projects are called packages and can consist of one or more **crates**.
 
 - Two basic projects in Rust: 
     - Libraries(lib crate)
-        - self contained code intended for use by other programs.
+        - this can either be static and dynamic.
+        - self contained code intended for use by other programs to speed up devt cycle and encourage code reuse.
         - can be published to a public package repository such as crates.io.
         - program execution begins in the src/lib.rs.
     
@@ -39,7 +43,7 @@
 
 - *cargo new project_name*
 
-- *cargo.toml* 
+-*Cargo.toml* 
     - serves as the config file for our crate.
     - also called the manifest.
     - At minimum have the main [package] section but can have subsections
@@ -60,7 +64,8 @@
 ## Rust Project Structure
 
 - Workspace > Package > Crate > Module > Src file(function).
-- Crate - unit of code sharing across Rust., either a binary or library.
+- Modules - code within have their own unique namespace, can be nested within one another.
+- Crate - unit of code sharing across Rust., either a binary or library, made up of multiple modules.
 - Workspace - set of packages that share a Cargo.lock file.
 - Comes with a standard library consisting of language primitives and commonly used functions, but it is small compared to other languages.
 - Thus need to rely on external libraries: *dependencies*
