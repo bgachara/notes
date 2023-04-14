@@ -7,6 +7,7 @@ and horizontal scaling`
 
 ## Introduction
 
+- Foundation models
 - Framework for developing applications powered by language models.
 - Not only interact via an api but apps also need to be data-aware(connect llm to other sources of data) and be agentic(llm to interact with its environment).
 - 
@@ -20,6 +21,34 @@ and horizontal scaling`
 - Chains
 - Agents
 
+
+## Use cases
+
+- Personal Assistants
+- Question Answering over Docs
+  - Ingestion
+    - Load documents(document loader)
+    - Split documents(text splitter)
+    - Create Embeddings for documents(text embedding model)
+    - Store documents and embeddings in a Vs.
+  - Retrieval Augmented Generation Chain
+    - Receive user question
+    - Lookup documents in the index relevant to the question
+    - Construct a promptvalue from the question and any relevant questions 
+    - Pass the promptvalue to a model
+    - Get back result and return to the user.
+- Chatbots
+- Querying Tabular data
+  - Document loading
+  - Querying 
+  - 
+- Interacting with APIs
+  - Chains
+  - Agents
+- Extraction
+  - Output Parsers
+- Evaluation
+- Summarization
 
 ## Vector databases
 
