@@ -1,6 +1,9 @@
 # Binary Analysis
 
-`Notes from the Practical Binary Analysis book`
+Ref:
+`Practical Binary Analysis book`
+`Mastering Reversing Engineering`
+`Learning Linux Binary Analysis`
 
 ## Introduction
 
