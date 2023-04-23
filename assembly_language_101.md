@@ -3,18 +3,18 @@
 `Notes from Introduction to 64bit Intel Assembly Language Processing for Linux`
 `Also Assembly 64`
 `Assembly programming with ARM on FreecodeCamp`
+`Assembly - Pwn Zero to Hero`
 
 
-`Human readable machine code`
-`Entry into the world of Assembly Language`
-`Its essential to reverse engineering both malicious and bening programs`
-`Write memory corruption exploits`
-`New h/w security often comes in the form of assembly instructions that need to be adopted`
-`Understand limitations of conventional architectures`
-``
 
 ## Introduction
 
+- Human readable machine code
+- Entry into the world of Assembly Language
+- Its essential to reverse engineering both malicious and bening programs
+- Write memory corruption exploits
+- New h/w security often comes in the form of assembly instructions that need to be adopted
+- Understand limitations of conventional architectures
 - Machine dependent as used only with a specific type of processor.
 - Called x86 because of the progression of Intel chips, 8086, 80186, 80286.
 - Originally 16-bit architecture, later evolved to 32 and 64 bit but kept backwards compatibility.

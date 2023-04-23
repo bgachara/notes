@@ -3,6 +3,7 @@
 `Notes from Modern operating systems by Tanenbaum`
 `Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
 
+
 ## Introduction
 
 - Primary job is provide user programs with a better, simpler, cleaner model of the computer and handle all the resources.

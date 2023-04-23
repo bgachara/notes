@@ -1,5 +1,13 @@
 # Notes of Rust PL
 
+Ref:
+`CodeAcademy Rust Tutorial`
+`Comprehensive Rust Google Android`
+`Practical Rust System Programming`
+`Rust Book`
+`Rust for Rustaceans`
+`Rust 101 - www.ralfj.de`
+
 
 ## General Features
 
@@ -8,6 +16,10 @@
 - On par performance with c and cpp.
 - General purpose language that can fall into any domain.
 - 178 different built-in architecture compilation targets.
+- Compile time memory safety
+- Lack of undefined runtime behavior
+- Modern Language Features i.e languages features and tooling.
+
 
 ## Rust Toolchain
 
@@ -316,6 +328,16 @@ println!("{}", number.value);
 ### Stack vs Heap
 
 - If we assign a variable to an existing variable with a stack-based type such as *i32*,it will make a computationally inexpensive copy of that value.
+- Stack: continuous area of memory for local variables.
+    - values have fixed size known at compile time.
+    - extremely fast: just move a stack pointer.
+    - easy to manage: follows function calls.
+    - Great memory locality
+- Heap: storage of values outside function calls
+    - values have dynamic sizes determined at runtime
+    - slightly slower than the stack, bookeeping needed
+    - No guarantee of memory locality
+        
 
 ````rust
 
@@ -1463,6 +1485,7 @@ let explicit: &'static str = "I am not even close";
 
 - This is stored on the heap and hence allow us to mutate value at will.
 - While heap is not as fast as the stack,it allows rust to automatically resize the allocated memory at when needed at runtime.
+- ptr, len, capacity stored on the stack.
 
 ```rust
 
