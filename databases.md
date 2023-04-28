@@ -164,6 +164,7 @@ Ref:
 
 CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distributed Dbs
 
+**Query Planning -> Operator Execution -> Access Methods -> Buffer Pool Manager -> Disk Manager**.
 
 ## Storage
 
@@ -390,4 +391,287 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - need to also support range queries.
     - most widely used compression scheme in DBMS.
     - support encode/locate and decode/extract.
-    - 
+  
+## Memory management and Buffer Pool
+
+- Spatial Control
+  - where to write pages on disk.
+  - goal: keep pages used together often as physically close as possible on disk.
+
+- Temporal Control 
+  - when to read into memory and when to write them to disk.
+  - goal: minimise number of stalls from having to read data from disk.
+
+- Buffer Pool 
+  - memory region organized as an array of fixed size pages.
+  - an array entry is called a frame.
+  - when DBMS requests a page, an exact copy is placed into one of these frames.
+  - dirty pages are buffered and not written to disk immediately: write back cache.
+  - page table keeps track of pages that are currently in memory.
+  - also maintains metadata: dirty flag, pin(prevent swap)/reference counter.
+  
+### Locks vs Latches
+  
+- Locks
+  - protects the db's logical contents form other transactions
+  - held for transation duration
+  - need to be able to rollback changes
+  
+- Latches
+  - protects critical sections of the DBMS internal ds from other threads
+  - held for operation duration
+  - do not need to be able to rollback changes
+  
+### Page Table vs Page Directory
+
+- Page directory
+  - page directory is the mapping from page ids to page locations in the database files
+  - all changes must be recorded on disk to allow the dbms to find on restart.
+
+- Page table
+  - mapping form page ids to a copy of the page in buffer pool frames
+  - in-memory data structure that does not need to be stored on disk
+  
+
+## Allocation policies
+
+- Global policies
+  - make decisions for all active queries
+  
+- Local policies
+  - allocate frames to a specific queries without considering the behaviour of concurrent queries.
+  - still need to support sharing pages.
+  
+### Buffer Pool Optimizations
+
+- Multiple Buffer Pools
+  - per-database buffer pool.
+  - per-page type buffer pool
+  - partitioning memory access across multiple pools helps reduce latch contention and improve locality
+  - approach:
+    - object id.
+    - hashing.
+    
+- Pre-Fetching
+  - can prefetch pages based on a query plan: sequential scans, index scans. 
+  
+- Scan Sharing
+  - reuse data retrieved from storage or operator computations
+  - also called synchronized scans.
+  - different form result caching.
+  - cursor sharing.
+
+- Buffer Pool Bypass
+  - sequential scan operator will not store fetched pages in the buffer pool to avoid overhead.
+  - memory is local to running query
+  - works well if operator needs to read a large sequence of pages that are contiguous on disk
+  - store temporary data.
+  - light scans
+
+- OS page cache
+  - most disl ops go through the OS API.
+  - unless DBMS tells it not to, the OS maintains its own filesystem cache(page cache, buffer cache)
+  - most DBMS use direct i/o(o_direct) to bypass the OS's cache.
+    - redundant copies of pages
+    - different eviction policies
+    - loss of control over file i/o.
+
+### Buffer replacement policies
+
+- when DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from buffer pool.
+- goals:
+  - correctness
+  - accuracy
+  - speed
+  - meta-data overhead
+- Least Recently Used
+  - maintain a single timestamp of when each page was last accessed.
+  - when eviction comes, select the one with the oldest timestamp.
+  - keep pages in sorted order to reduce the search time on eviction.
+- Clock 
+  - approximation of LRU that does not need a separate timestamp per page.
+  - each page has a reference bit, when accessed set to 1.
+  - organize pages ina circular buffer with a clock hand
+  - upon sweeping, check if a page bit is set to 1, if yes, set to zero, if no, evict.
+  - *common mechanism* - read more.
+- Clock and LRU are susceptible to sequential flooding.
+- Better policies: 
+  - LRU-K
+    - track history of last K references to each page as timestamps and compute the interval between subsequent accesses.
+    - DBMS then uses history to estimate the next time that page is going to be accessed.  
+  - Localization
+    - chooses which pages to evict per query basis
+    - minimizes pollution of the buffer pool from each query.
+    - postgres maintain small ring buffer that is private to the query.
+  - Priority Hints
+    - DBMS knows about the context of each page during query execution
+    - provides hints to the buffer pool on whether a page is important or not.
+
+### Dirty pages
+
+- Fast Path:
+  - if a page in the buffer pool is not dirty then the DBMS can simply drop it.
+
+- Slow Path
+  - if a page is dirty then the DBMS must write back to disk to ensure that its changes are persisted.
+
+- Background writing
+  - DBMS can periodically walk through the page table and write dirty pages to disk
+  - when dirty page is written, DBMS can either evict or unset dirty flag.
+  - careful system doesnt write dirty pages before their log records are written.
+  
+### Other Memory Pools
+
+- DBMS needs memory for things other than indexes and tuples
+- May not be always backed by disk
+- e.g:
+  - Sorting + Join buffers
+  - Query caches.
+  - Maintenance buffers
+  - Log buffers
+  - Dictionary caches.
+
+- DBMS can almost always manage memory better than the OS.
+- Leverage semantics about the query plan to make better decisions.
+
+
+## Hash Tables
+
+- How to support the DBMS execution engine to read/write data from pages.
+- Data structures:
+  - Hash Tables
+  - Trees
+
+- Use cases:
+  - Internal Meta-data
+  - Core data storage
+  - Temporary data structures  
+  - Table Indexes.
+  
+- Design decisions
+  - Data Organisation
+    - how we layout data structure in memory/pages and what information to store to support efficient access.
+  - Concurrency
+    - how to enable multiple threads to access the data structure at the same time without causing problems.
+
+- Hash Table
+  - implements an unordered associative array that maps keys to values.
+  - uses a hash function to compute an offset into this array for a given key, from which the desired value can be found.
+  - space complexity o(n), Time complexity: average O(1), worst O(n)
+  
+  - Static Hash Table:
+    - allocate a giant array that has one slot for every element you need to store.
+    - to find an entry, mod the key by the number of elements to find offset in the array.
+    - Assumptions:
+      - number of elements is known ahead of time and fixed.
+      - each key is unique
+      - perfect hash function
+  
+  - Design Decisions:
+    - Hash Function
+      - how to map a large key space into a smaller domain
+      - trade-off between being fast vs collision rate.
+    - Hashing Scheme
+      - how to handle key collisions after hashing
+      - trade-off between allocating a large hash table vs additional instructions to get/put keys.
+  
+  - Hash Functions
+    - For any input key, return an integer representation of that key.
+    - We dont want to use a cryptograhic hash function for DBMS hash tables
+    - desire fast and low collision rates
+    - Namely:
+      - CRC-64 (1975) - used in networking for error detections
+      - MurmurHash (2008) - fast, general purpose hash function
+      - Google CityHash (2011) - faster for shorter keys
+      - *FB XXHash (2012) - creator of zstd compression
+      - Google FarmHash (2014) - newer version of CityHash with better collision rates
+      
+  - Static Hashing Schemes
+    - *Linear Probe Hashing
+      - also known as open addressing
+      - single giant table of slots
+      - resolve collisions by linealry searching for the next free slot in the table.
+      - inserts and deletions are generalizations of lookups.
+      - Non-unique Keys
+        - Separate Linked List
+        - Redundant Keys
+        
+    - Robin Hood Hashing
+      - Variant of linear probe hashing that steals slots from rich keys and give them to poor keys.
+      - difference from initial position and move the rest to equidistant position.
+    
+    - Cuckoo Hashing
+      - use multiple hash tables awith different hash function seeds.
+      - one insert, check every table and pick anyone that has a free slot, if no table has a free slot, evict element from one of them and re-hash it to find a new location.
+      - look-ups and deletions are always because only one location per hash table is checked.
+    
+- *above hash tables require the DBMS to know the number of elements it wants to store, otherwise needs to rebuild the table if it needs to grow.shrink in size*.
+  
+  - Dynamic Hashing Schemes
+    - Chained Hashing
+      - maintain a linked list of buckets for each slot in the hash table.
+      - resolve collisions by placing all elements with the same hash key into the same bucket.
+    - Extendible Hashing 
+      - multiple slot locations can point to the same bucket chain
+      - reshuffle bucket entries on split and increase the number of bits to examine.
+    - Linear Hashing
+      - maintains a pointer that tracks the next bucket to split
+        - when bucket overflows, split the bucket at the pointer location
+      - use multiple hashes to find the right bucket for a given key.
+      - can use different overflow criterion
+        - space utilization.
+        - average lenght of overflow chains.
+      - splitting buckets based on the split pointer will eventually get to all overflowed buckets. 
+  
+  - B+ Trees
+    
+    - This is a self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions and deletions always in 0(log n)
+    - Generalization of a binary search tree, since a node can have more than two children.
+    - optimized for systems that read and write large blocks of data.
+    - mostly used for table indexes
+    - A tableindex is a replica of a subset of a table's attributes that are organised and/or sorted for efficient access using those attributes.
+    - DBMS ensure that contents of the table and the index are logically synchronized.
+    - It's the DBMS job to figure out the best indexes to use to execute each query.
+    - There is a trade-off regarding the number of indexes to creaeper database
+      - storage overhead
+      - maintenance overhead
+    - *the ubiquitous b-tree*, *efficient locking for concurrent ops on b-trees*
+    
+    - Properties: 
+      - M-way search tree.
+      - its perfectly balanced, every leaf node is at the same depth in the tree.
+      - every node other than the root is at least half-full.(M/2-1 < #keys < M-1)
+      - every inner node with k keys has k+1 non-null children
+    
+    - Structure
+      - comprised of an array of key/value pairs
+      - keys are derived from the attributes that index is based on
+      - values will differ based on whether the node is classified as an inner node or a leaf node.
+      - arrays are kept in sorted key order, usually.
+      - leaf node values
+        - record IDs
+          - a pointer to the location of the tuple to which the index entry corresponds
+        - tuple data
+          - leaf nodes store the actual contents of the tuple
+          - secondary indexes must store the record ID as their values.
+      - original b-tree stored jeys and values in all nodes in the tree
+      - b+ tree only stores values in leaf nodes, inner nodes only guide search.
+      - consistent with implementation
+      - duplicate keys
+        - Append record ID.
+        - Overflow leaf nodes  
+      
+      - Clustered Indexes
+        - table is stored in sort order specified by the primary key.
+        - can either heap or index organized storage.
+        - some DBMS always use a clustered index.
+          - if a table doesnt contain primary key, DBMS will automatically make a hidden primary key.
+        - other DBMS cannot use them at all.
+        - clustered B+ tree
+      
+      - Index scan page sorting
+        - retrieving tuples in the order the appear in a non-clustered index due to redundant reads
+        - the DBMS can first figure out all the tuples that it needs and then sort them based on the page ID.
+        
+      - Covering Indexes
+      - Design Choices
