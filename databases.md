@@ -674,4 +674,434 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - the DBMS can first figure out all the tuples that it needs and then sort them based on the page ID.
         
       - Covering Indexes
-      - Design Choices
+    
+    - Design Choices
+      - Node size 
+        - the slower the storage device the larger the optimal node size of a B+ tree.
+        - optimal sizes can vary depending on the workload.
+        - leaf node scans vs root-to-leaf traversals
+      - Merge Threshold
+      - Variable-length keys
+        - Pointer
+        - Varibale lenght nodes
+        - Padding
+        - Key Map /Indirection 
+      - Intra-node search
+        - Linear
+          - use SIMD to vectorize comparisons
+        - Binary
+          - jump to middle, pivot left/right depending on comparison
+        - Interpolation
+          - approx location of desired key based on known distribution of keys.
+      
+      - Optimizations
+        - Prefix compression
+        - Deduplication
+        - Suffix Truncation
+        - Pointer Swizzling
+        - Bulk Insert
+        - Buffer Updates
+    
+  ## Concurrent Control
+   
+  - Assumption has been all DS that we've discussed so far are single-threaded, but a DBMS needs to allow multiple threads to safely access DS to take advantage of CPU core and hide I/O disk stalls.
+  - Concurrency control protocol is the mehtod that DBMS uses to ensure correct results for concurrent operations on a shared object
+  - Protocol correctness criteria can vary:
+    - Logical correctness: can thread see data it is not supposed to see.
+    - *Physical correctness: is IR of the object sound
+  - Locks vs Latches
+  
+  - Latch Modes
+    - Read Mode
+    - Write Mode  
+  
+  - Latch Implementations
+    - Blocking OS mutex.
+    - Reader-writer latches
+  
+   - Hash Table Latching
+    - Page Latches
+    - Slot Latches  
+    
+  - B+ Tree concurrency control
+    - multiple threads to read and update the b+ tree.
+    - Latch crabbing/coupling
+      - allow access/modify
+      - latch parent, latch child, release if parent is safe.
+      - a safe node is one that will not split or merge on update
+      - fifo release style.
+      - better latching algorithm
+    - Leaf noe scanning concurrency
+    - Latches do not support deadlock detection or avoidance, only via coding discipline
+*Making a data structure thread-safe is notoriously difficult in practice*
+
+> OPERATOR EXECUTION
+
+## Sorting and Aggregation Algorithms
+
+- Query Plan
+- Disk-oriented DBMS.
+- Still need the buffer pool.
+- if fits in memory, quicksort
+
+- Include: 
+  - Top N Heap Sort
+    - if a query contains an order by with a limit, DBMS only needs to scan data once to find top-N els.
+    - scan data once and maintain an in-memory sorted priority queue.
+  - External Merge Sort
+    - Divide and conquer algo that splits data into separate runs, sorts them individually and then combines then into longer sorted runs.
+    - Sorting
+      - sort chunks of data that fit in memory and then write back the sorted chunks to a file on disk.
+    - Merging
+      - combine sorted runs into larger chunks.
+    - a run is a list of key(attr to compare)/value(tuple(early mat), record ID) pairs.
+    - 2-way external merge sort.
+  - B+tree to sort
+    - clustered b+ tree.
+  - Aggregations
+    - collapse values for a single attribute from multiple tuples into a single scalar value.
+    - DBMS needs to quickly find tuples with the same distinguishing attributes for grouping.
+    - Implementations:
+      - Sorting
+        - partition.
+        - rehashing
+      - Hashing
+
+## Join Algorithms
+
+- We normalize tables in a relational database to avoid unnecessary repetition of information.
+- We then use the join operator to reconstruct the original tuples without loss of information.
+- We will focus on performing binary joins using inner equijoin algorithms
+  - can be tweaked to support other joins.
+  - multi-way joins exist but only in research
+- In theory we want the smaller table to always be the left table in the query olan
+  - optimizer will figure this out when generating the physical plan.
+- Join Operators
+  - Output
+    - what data does the join operator emit to its parent operator in the query plan tree.
+    - output contents can vary:
+      - processing model
+      - storage model
+      - data requirements in the query.
+  - Cost Analysis Criteria
+    - how do we determine whether one join algorithm is better than the other.
+    - Number of IOs to compute join
+- Join Algorithms
+  - Nested Loop Join
+    - Simple/Stupid
+      - Nested loop join
+    - Block
+      - for every block in R scans S once.
+    - Index
+  - Sort-Merge Join
+    - Sort
+      - sort both tables on the join key
+      - worst case is when join attribute of all tuples is same on join tables
+    - Merge
+  - Hash Join
+    - Build
+    - Probe
+    - Cost Analysis
+    - Optimization
+      - Probe filter
+        - Bloom Filter
+          - probabilistic data structure that answers set membership queries
+            - false negatives will never occur
+            - false positives can sometimes occur
+    - Partitioned Hash Join
+      - Hash join when tables dont fit in memory
+        - Bloom Filter
+          - probabilistic data structure that answers set membership queries
+            - false negatives will never occur
+            - false positives can sometimes occur
+    - Partitioned Hash Join
+      - Hash join when tables dont fit in memory.
+
+*Integrate a profile for project*
+## Query Execution
+ 
+  - Processing Models
+    - defines how the system executes a query plan
+    - different trade-offs for different workloads
+    
+    - Approaches:
+      - Iterator Model
+        - also known as volcano or pipeline model.
+        - each query olan operator implements a Next() function.
+        - used in almost every DBMS, allows for tuple pipelining.
+        - some operators must block until their children emit all their tuples, joins, subqueries, order by.
+      - Materialization Model
+        - Each operator processes its input all at once and then emits its output all at once.
+        - Better for OLTP workloads because queries only access a small number of tuples at a time. 
+        - Not good for OLAP with large intermediate results.
+      - Vectorized / Batch Model
+        - each operator emits a batch of tuples instead of a single tuple
+        - ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
+        - allows for opearators to more easily use SIMD to process batches of tuples.
+  
+  - Plan Processing Direction
+    - Top-to-Bottom
+      - start with the root and pull data up from its children
+      - tuples are always passed with function calls.
+    - Bottom-to-Top
+      - start with lead nodes and push data to their parents
+      - allows for tighter control of caches/registers in pipelines.
+  
+  - Access Methods
+    - This is the way DBMS access the data stored in a table
+    - Approaches
+      - Sequential
+        - Optimizations
+          - Prefetching
+          - Buffer Pool Bypass
+          - Parallelization
+          - Heap Clustering
+          - Late Materialization
+          - Data Skipping
+            - Approximate Queries (Lossy)
+              - execute queries on a sampled subset of the entire table to produce approxiate results
+            - Zone Maps (Loseless)
+              - pre-computed aggregates for the attribute values in a page. DBMS checks zone map first to decide whether it wants to access the page
+      - Index Scan
+        - DBMS picks an index to find the tuples that the query needs.
+        - Depends on:
+          - What attributes the index contains
+          - What attributes the query references
+          - Attribute's value domains
+          - Predicate composition
+          - Whether the index has unique or non-unique keys
+      - Multi-Index Scan
+        - multiple indexes that the DBMS can use for a query.
+  - Modification Queries
+    - operators that modify the database(INSERT, UPDATE, DELETE) are responsible for modifying the target table and its indexes.
+      - constraint checks can either happen immediately inside of operator or deferred until later in query/transaction.
+    - Halloween problem
+      - anomaly where an update operations chages the physical location of a tuple which causes a scan operator to visit the tuple multiple times.
+      - track modified record ids per query.
+      
+  - Expression Evaluation
+    - represents a WHERE clause as an expression tree.
+    - nodes in the tree represent different expression types
+      - comparisons, conjuction, arithmetic operators, constant values, tuple attribute references.
+  
+  - JIT compilation can potentially speed times up.
+  
+## Parallel Query Execution
+
+- Multiple workers in the same database
+- Increased perfomance for potentially the same hardware resources
+  - Higher Throughput
+  - Lower Latency
+- Increased responsiveness of the system.
+- Potentially lower TCO(total cost of ownership)
+  - fewer machines
+- Parallel vs Distributed
+  - both appear as single logical to a client application or DBMS frontend.
+  - same wury should have the same results for both.
+  - resources close vs far from each other
+  - resources communicate fast vs slow.
+  - comminication cheap and reliable vs very opposite.
+- Process Models
+  - how system is architectured to support concurrent requests ftom a multi-user application
+  - worker is the DBMS component that is responsible for executing tasks on behalf of the client and returnin the results.
+  - Approach:
+    - Process per DBMS worker
+      - each process is a separate OS process.
+      - relies on OS scheduler.
+      - uses hared memory for gloabl data structures.
+    - Thread per DBMS worker
+      - single process with multiple worker threads.
+      - DBMS manages its own scheduling
+      - may or not use a dispatcher thread.
+      - thread crash may kill the entire system.
+      - Scheduling
+        - How many tasks should it use?
+        - How many CPU cores should it use.
+        - What CPU core should the tasks eecute on
+        - Where should a task store its output
+      - DBMS always knows more than the OS.
+      - *SQLOS* 
+        - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
+        - Non-preemptive thread scheduling through instrumented DBMS code.
+    - Embedded worker
+      - runs inside the same address space as the application
+      - application is responsible for threads and scheduling
+      - application may support outside connections, BerkeleyDB, SQLite, RocksDB, LevelDB.
+    - Process models
+      - adavantages of multi-thread
+        - less overhead per context switch
+        - do not have to manage shread memory.
+        - thread per worker does not mean that DBMS supports intra-query parallelism
+    - Inter vs Intra Query Parallelism
+      - Inter: Execute multiple disparate queries simultaneously
+        - increases throughput and reduces latency
+        - if read-ony then this requires almost no explicit co-ord between queries.
+        - hard if updating tables.
+      - Intra: Execute the operations of a single query in parallel
+        - improve the performance of a single query by executing its operators in parallel.
+        - there are parallel versions of every operator.
+        - decreases latency for long-running queries esp for OLAP queries.
+        - Approaches
+          - Intra-operator(Horizontal)
+            - inserts an exchange operator into the query plan to coalesce/split results from multiple parent/child.
+            - types: Gather, Distribute, Repartition
+          - Inter-operator(Vertical)
+            - also called pipeline parallelism.
+          - Bushy
+            - Hybrid of Intra and Inter
+            
+    - Using additional processes/threads to execute queries in parallel wont help if the disk is always the main bottleneck.
+- Execution Parallelism
+- I/O Parallelism
+  - split the DBMS across multiple storage devices to improve disk bandwidth latency.
+  - many different options that have trade-offs
+    - multiple disks per db.
+    - one db per disk.
+    - one relation per disk.
+    - split relation across multiple disks
+  - some dbms support this natively, others require admin to configure outside of DBMS.
+- Database Partitioning
+  - some DBMS allow you to specify the disk location of each individual database.
+  - *discussed further below*
+- Issues:
+  - Coordination Overhead.
+  - Scheduling
+  - Concurrency Issues
+  - Resource Contention.
+  
+## Query Planning and Optimization
+
+- For a given query find the correct execution plan that has the lowest "cost".
+- This is the part of a DBMS that is the hardest to implement well(proven to be NP-complete)
+- No optimizer truly produces the "optimal" plan.
+  - Use estimation techniques to guess real plan cost
+  - Use heuristics to limit the search space.
+
+- **This is the hardest part of any database**
+
+- Logical plans vs Physical plans
+  - the optimzer generates a mapping of a logical algebra expression to the optimal equivalent physical algebra expression
+  - Physical operators define a specific execution strategy using an access path.
+    - they can depend on the physical format of the data that they process(sorting, compression).
+    - Not always a 1:1 mapping from logical to physical.
+  - The goal is to increase the likelihood of enumerating the optimal plan in the search.
+  
+- Architecture overview
+  - | Application | --> SQL Query -> | SQL Rewriter | --> SQL Query -> | Parser | --> AST -> | Binder | --> Logical Plan | Tree Rewriter | --> Logical Plan -> | Optimizer | --> Physical Plan | Execute |.
+  - System Catalog --> name - internal ID, Schema Info, 
+  - Cost model --> Estimates.
+
+- Query Optimization
+  - Heuristics / Rules
+    - rewrite the query to remove stupid / inefficient things
+    - techniques may need to examine catalog but they do not need to examine data
+  - Cost based search
+    - use a model to estimate the cost of executing a plan.
+    - enumerate multiple equivalent plans for a query and implement the one with the lowest cost
+
+- Logical Query Optimization
+  - Split Conjuctive predicates
+    - decompose predicates into their simplest forms to make it easier for the optimizer to move them around.
+  - Predicate pushdown
+    - move the predicate to the lowest applicable point in the plan.
+  - Replace cartesian products with joins
+    - replace with inner joins using the join predixcate
+  - Projection pushdown  
+    - eliminate redundant attributes before pipeline breakers to reduce materialization cost.
+
+- Nested Sub-Queries.
+  - DBMS treats nested sub-queries in the where clause as functions that take parameters and return a single value or set of values
+  - Two approaches
+    - Rewrite to de-correlate and/or flatten them
+    - Decompose nested query and store result to temporary table.
+      - for harder one, optimzer breaks up queries into blocks and then concentrates on one block at a time.
+      - sub-queries are written to a temporary table that are discarded after the query finishes
+
+- Expression Rewriting 
+  - Optimizer transforms a query expressions(WHERE/ON) into the minimal set of expressions.
+  - Implemented using if/then/else clauses or a pattern-matching rule engine.
+    - search for expressions that match a pattern
+    - when a match is found, rewrite the expression
+    - Halt if there are no more rules that match.
+  - Impossible /Unnecessary predicates
+  - Merging predicates
+
+- Cost Estimation
+  - DBMS uses a cost model to predict the behavior of a query plan given a database state
+    - Internal cost that allows the DBMS to compare one plan with another.
+  - Its too expensive to run every possible plan to determine this information, so DBMS need a way to derive this information.
+  - * Look into MongoDB implementation 
+  - Cost model components:
+    - Physical costs
+      - predict CPU cycles, I/O, cache misses, RAM consumption, network messages
+      - heavily dependant on hardware
+    - Logical Costs
+      - estimate output size per operator
+      - independent of the operator algorihtm
+      - need estimations for operator result sizes
+    - Algorithmic costs
+      - Complexity of the operator algorithm implementation
+  - Postgres cost model
+    - uses a combo of CPU and I/O costs that are weighted by magic constant factors.
+    - default settings are obviously for a disk-resident database without a lot of memory
+      - processing a tuple in memory is 400x faster than reading a tuple from disk
+      - sequential i/o is 4x faste than random i/o.
+    - some dbs run benchmark tests to update planner cost constants.
+  - Statistics
+    - DBMS stores internal statistics about tables, attributes and indexes in its internal catalog
+    - Different systems update them at different times
+    - Manual invocations
+      - Postgres/SQLite: ANALYZE
+      - Oracle/MySQL: ANALYZE TABLE
+      - SQL Server: UPDATE STATISTICS
+      - DB2: RUNSTATS
+    - Selection Cardinality
+      - Uniform Data
+        - distribution of values is the same.
+      - Independent Predicates
+        - predicates on attributes are independent
+      - Inclusion Principle
+        - domain of join keys overlap such that each key in inner relation will also exist in the outer table
+    - Correlated attributes
+    - Statistics storage:
+      - Histograms
+        - maintain an occurence count per value (or ranhe of values) in a column
+        - equi-width histogram.
+        - equi-depth histogram.
+      - Sketches
+        - probabilistic data structure that gives an approximate count for a given value
+        - can replace histograms with sketches to improve its estimate accuracy
+      - Samplings
+        - maintains a small subset of each table that is used to evaluate expressions to compute selectivity.
+        - update samoles when the underlying table chages significantly.
+        
+  - Query Optimization
+    - After performing rule-based rewriting, the DBMS will enumerate different plans for the query and estimate their costs
+    - I.e: 
+      - Single relation
+      - Multiple relations
+      - Nested sub-queries
+    - Chooses the best plan it has seen for the query after exhausting all plans or some timeout.
+    - Single relation
+      - Pick the best access method
+      - Predicate evaluation ordering
+      - Simple heuristics are often good enough for this.
+      - OLTP queries are easy
+        - Sargable (Search Argument Able)
+    - Multiple Relation QP
+      - Bottom-up optimization
+        - use static rules to perform initial optimization.
+        - The use dynamic programming to determine the best join order for tables using the divide and conquer search method.
+        - Used by most DBMS
+        - System R optimizer
+      - Top-down optimization
+        - Start with a logical plan of what we want the query to be.
+        - Perform a branch and bound search to traverse the plan tree by converting logical operators into physical operators
+          - keep track of global best plan during search
+          - treat physical properties of data as first class entities during planning.
+        - **Watch the MSSQL query optimizer talk**
+        
+## Concurrency Control Theory
+
+    
+    

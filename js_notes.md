@@ -3,6 +3,7 @@
 `Colt Steele: Modern Javascript`
 `Javascript tips from all over`
 
+
 # Introduction
 
 - ECMAScript, TC39
@@ -21,7 +22,7 @@
   - string methods, .toUppercase(), .trim()
   - an chain methods, .trim().toUppercase()
   - some methods accept arguments, item.slice(), item.indexOf("args"), item.replace()
-  - 
+
 - Escape characters
 - Template Literals use `You owe me ${9+0}`
 - Null - intentional absence of value.
@@ -159,7 +160,7 @@ condition ? expIfTrue: expIfFalse
 - Reference type variable 
  - arrays
  - const declaration can change contents not reference
-
+ - objects
 
 // compare a current assignment on new assignment trial???
 
@@ -176,6 +177,49 @@ shoppingList[1]
 shoppingList[1] = "pumpkin";
 ````
 
+## Objects
+
+- collections of properties.   
+- properties are a key-value pair.
+- access data using keys rather than index
+- {} - object literal
+- nest objects too like arrays
+- object equality, tied to reference location, hence not equal.
+
+
+````js
+
+const fitBitData = {
+ totalMiles: 90,
+ location: 'POPO',
+ time: '3.3'
+}
+
+//access data out of object.
+fitBitData.time
+
+fitBitData['time']
+
+//can load objects using same syntax
+
+fitBitData['lunar'] = 'leo';
+
+````
+
+## Loops
+
+- doing things repeatedly
+- for(init: condition to run: operation: ){sth}
+- 
+
+````js
+
+for (let i = 1; i<=10; i++ ){
+ console.log('Hello', i)
+
+}
+
+````
 
 ## From Browser Implementations
 
