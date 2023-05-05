@@ -32,8 +32,9 @@ Ref:
   - Data Integrity.
   - Implementation
   - Durability
-- DBMS - software that allows applications to store and analyze information in a database.
-       - supports definition, creation, querying, update and administration in accordance to a data model.
+- DBMS 
+  - software that allows applications to store and analyze information in a database.
+  - supports definition, creation, querying, update and administration in accordance to a data model.
 
 ## Data models
 
@@ -98,7 +99,8 @@ Ref:
 - Query Processing
   - query shipping
   - logical vs physical models of database design
-  - query tree - turned from a logical plan to physical plan.
+  - query tree 
+    - turned from a logical plan to physical plan.
   - Steps
     - Parsing
     - Query Validation
@@ -1103,5 +1105,736 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         
 ## Concurrency Control Theory
 
+  - A DBMS's concurrency control and recovery components permeate throughout the desing of its entire architecture.    
+  - Motivation:
+    - How to avoid race condition? Lost Updates
+    - What is the correct database state? after a failure? Durability
+  - Concurrency control and recovery
+    - valuable properties of DBMS
+    - Based on concept of transactions with ACID properties
+
+### Transactions
+
+  - A Tx is the execution of a sequence of one or more operations on a database to perform some higher-level function
+  - It is the basic unit of change in a DBMS
+    - partial tx are not allowed.
+  - Strawman system
+    - execute txn one-by-one as they arrive at the DBMS.
+    - before a txn starts, copy the entire db to a new file and make all changes to that file.
+    - is it correct? is it fast?
+  - A better approach is to allow concurrent execution of independent txns
+    - better utilization/throughput
+    - increased response times to users
+  - Arbitrary interleaving of operations can lead to"
+    - Temporary Inconsistency
+    - Permanent Inconsistency
+  - A DBMS is only concerned about what data is read/written from /to the database.
+  - Transactions in SQL
+    - start with BEGIN command
+    - Stops with either COMMIT or ABORT.
+  - Atomicity, Consistency, Isolation, Durability...ACID.
+  - Atomicity
+    - Txn always either executes all its actions or executes no actions at all.
+    - Approach:
+      - Logging
+        - logs all actions so that it can undo the actions of aborted txns
+        - maintain undo records both in memory and on disk
+      - Shadow Paging
+        - makes copies of pages and txns make changes to theose copies, only when the txn commits is the page made visible to others
+  - Consistency
+    - world represented by the db is logically correct, all qiestions asked about the data are given logically correct answers
+    - Database consistency
+      - accurately models the real world and follows integrity constraints
+      - txns in future see the effects of txns committed in the past inside of the database
+    - Transaction consistency
+      - if db is consistent before txn starts it will also be consistent after
+      - this is the application's responsibility.
+  - Isolation
+    - usr submit txns and each txn executes as if it was running by itself
+    - but the dbms achieves concurrency by interleavinf txns
+    - A concurrency control protocol is how the DBMS decides the proper interleaving of operations from multiple transactions
+    - Categories:
+      - Pessimistic - dont let problems arise in the first place.
+      - Optimistic - assume conflicts are rare and deal with them after they happen.
+    - When one txn stalls because of resource then another txn allowed to go forward.
+    - Formal properties of schedules
+      - Serial schedule
+        - a schedule that does not interleave the actions of different transactions
+      - Equivalent schedules
+        - for any db state, the effect of executing the first schedule is identical to the effect of executing the second schedule.
+      - Serializable schedule
+        - a schedule that is equivalent to some serial execution of the transactions
+        - if each txn preserves consistency, every serializable schedule preserves consistency
+        - Serializability is a less intuitive notion of correctness compared to txn initiation time or commit order, but it provides the DBMS with more flexibility in scheduling operations
+        - more flexibility means better parallelism.
+    - Conflicting operations
+      - need a formal notion of equivalence that can be implemented efficiently based on the notion of conflicting operations
+      - Two ops conflict if:
+        - they are by different transactions
+        - they are on the same object and one of them is a write.
+      - Interleaved Execution Anomalies
+        - Read - Write conflicts
+        - Write- Read conflicts
+          - one txn reads data written by another txn that has not committed yet
+        - Write - Write conflicts.
+          - one txn overwrites uncommitted data from another uncommitted txn
+    - Levels of serializability
+      - Conflict serializability*
+      - View Serializability - no system can do this?????
+    - Conflict serializable schedules
+      - Two txns are conflict equivalent iff:
+        - they involve the same actions of the same txns
+        - every pair of conflicting actions is ordered the same way.
+      - Schedule S is conflict serializable if:
+        - S is conflict equivalent to some serial schedule
+        - Intuition
+    - Dependency graph
+  - Durability
+    - all changes of committed txns should be persistent
+      - no torn updates
+      - no changes from failed transactions
+    - DBMS can use either logging or shadow paging  to ensure all changes are durable
+  - Concurrency control and recovery are among the most important functions provided by a DBMS
+ 
+  ## Two Phase Locking
+  
+  - We need a way to guarentee that all execution schedules are correct(serializable) without knowing the entire schedule ahead of time.
+  - Use *LOCKS* to protect database objects.
+  - Existing component called a Lock Manager.
+  - Locks: 
+    - Separate User transactions.
+    - Protect Database contents.
+    - During Entire Transactions
+    - Modes: Shared, Exclusive, Update, Intention
+    - Deadlock Detection and Resolution
+    - By Waits-for, Timeout, Aborts
+    - Kept in Lock Manager.
+  - Basic Lock Types
+    - S-LOCK: Shared locks for reads.
+    - X-LOCK: Exclusive locks for writes.
+  - Executing with locks
+    - Transactions request locks
+    - Lock manager grants or blocks requests
+    - Transactions release locks
+    - Lock manager updates its internal lock-table.
+      - keeps track of what transactions hold what locks and what transactions are waiting to acquire any locks.
+      - global view of a transactions activity
+      - cheaper than updating latches on a B+ TREE.
+  - Concurrency control protocol
+    - 2PL is a concurrency control protocol that determines whether a txn can access an object in the database at runtime.
+    - protocol does not need to know all the queries that a txn will execute ahead of time.
+  - Two-Phase Locking
+    - Growing
+      - each txn requests that locks that it needs from the DBMS lock manager
+      - lock manager grants/denies lock requests
+    - Shrinking 
+      - txn is allowed to only releasse/downgrade locks that it previously acquired, cannot acquire new locks.
+  - 2PL on its own is sifficient to guarantee conflict serializability because it generates schedules whose precendence graph is acyclic.
+  - But it is subject to cascading aborts.
+  - Potential schedules that are serializable but would not be allowed by 2PL because locking limits concurrency.
+  - May still have "dirty reads".
+  - Strong Strict Two-phase locking.
+      - Txn is only allowed to release locks after it has ended(committed or aborted)
+      - Allows only conflict serializable schedules, but it is often stronger than needed for some apps.
+      - a schedule is strict if a value written by a txn is not read or overwritten by other txns unitl that txn finishes.
+      - Advantages:
+        - does not incur cascading aborts.
+        - aborted txns can be undone by just restoring original values of modified tuples.
+  - May lead to deadlocks.
+    - A deadlock os a cycle of transactions waiting for locks to be released by each other.
+      - Deadlock Detection
+        - creates a waits-for graph to keep track of what locks each txn is waiting to acquire.
+          - nodes are transactions.
+          - edge from Ti to Tj if Ti is waiting for Tj to release a lock.
+        - system periodically checks for cycles in waits-for graph and then decided how to break it.
+      - Deadlock Handling
+        - DBMS selects a victim txn to rollback to break the cycle.
+        - Either by:
+          - By age
+          - By progress
+          - By the # of items alredy locked
+          - By # of txns that we have to rollback with it.
+        - Should also consider how many times a txn has been restarted to perevent starvation
+        - Rollback length
+          - Completely
+            - Rollback entire txn and tell the application it was aborted.
+          - Partial(Savepoints)
+            - DBMS rools back a portion of a txn(to break deadlock) and then attempts to re-execute the undone queries.
+        - The victim txn will either restart or abort depending on how it was invoked.
+        - Tradeoff between the frequency of checking for deadlocks and how long txns wait before deadlocks are broken.
+      - Deadlock Prevention
+        - When a txn tries to acquire a lock that is held by another txn, the DBMS kills one of them to prevent a deadlock.
+        - This approach does not require a waits-for graph or detection algorithm.
+        - Approach
+          - Wait-Die.
+            - if requesting txn has higher priority than holding txn, then requesting txn waits for holding txn.
+            - otherwise requesting txn aborts.
+          - Wound-Wait
+            - if requesting txn has higher priority than holding txn, then holding txn aborts and releases lock.
+            - otherwise requesting txn waits.
+        - Why do schemes quarantee no deadlocks
+          - only one type of direction allowed when waiting for a lock.
+        - When a txn restarts, what is its new priority?
+          - its original timestamp to prevent it from getting starved for resources.
+      - Acquiring locks is amore expensive operation than acquiring a latch even if that lock is available
+  - Lock Granularities
+    - DBMS decides the granularity of a lock when a txn wants a lock.
+      - Attribute, Tuple, Page, Table
+    - DBMS should ideally obtain fewest number of locks that a txn needs.
+    - Trade-off parallelism versus overhead
+    - Database Lock Hierarchy 
+      - Database -> Table -> Page -> Tuple -> Attribute.
+  
+  - Intention Locks
+    - An intention lock allows a higher-level node to be locked in shared or exclusive mode without having to check all descendent nodes
+    - If a node is locked in an intention mode, then some txn is doing explicit locking at a lower level in the tree.
+    - Types:
+      - Intention-Shared
+        - intent to get S lcoks at finer granularity.
+      - Intention-Exclusive
+        - intent to get X lock at finer granularity.
+      - Shared+Intention Exclusive
+        - subtree rooted by that node is locked explicitly in shared mode and explicit locking is done at a lower level with exclusive-mode locks.
+    - Compatibility Matrix
+    - Locking Protocol
+      - eact txn obtains appropriate lock at the highest level of the database hierarchy.
+    - Lock Escalation
+      - DBMS can automatically switch to coarse grained locks when a txn acquires too many low-level locks
+      - This reduces the number of requests that the lock manager must process.
+  - Applications dont acquire a txn's locks manually
+  - Need to provide the DBMS with hints to help it improve concurrency.
+  - Explicit locks are also useful when doing major changes to the database.
+  - Lock Table
+  
+## Timestamp-Ordering Concurrency Control
+  
+  - Determine serializability order of txns beofre they execute.
+  - Use timestamps to determine the serializability order of txns.
+  - Each txn is assigned a unique fixed timestamp that is monotonically increasing.
+  - Implementation strategies
+    - System/Wall clock
+    - Logical counter
+    - Hybrid
+  - Basic T/O
+    - Txns read and write objects without locks
+    - Every object X is tagged with timestamp of the last txn that successfully did read/write.
+    - Check timestamps for every operation.
+    - Thomas Write Rule(Robert H Thomas)
+      - ignore the write to allow the txn to continue executing without aborting.
+    -  Generates a schedules htat is conflict serializable of you do not use the Thomas write Rules
+    - High overhead from copying data to txns workspace and from updating timestamps
+      - every read requires the txn to write to the database.
+    - Long running txns can get starved
+      - likelihood that a txn will read sth from a newer txn increases.
+  - If you assume that conflicts between txns are rare and that most txns are short-lived then forcing txns to acquire locks or update timestamps adds unncessary overhead.
+  - A better approach is to optimize for the no-conflict case.
+  - Optimistic Concurrency Control
+    - DBMS creates a provate workspace for each txns
+      - any object read is copied into workspace
+      - modifications are applied to workspace.
+    - When a txn commits, DBMS compares workspace write set to see whether it conflicts with other txns
+    - If there are no conflicts, the write set is installed into the global database.
+    - Phases:
+      - Read Phase
+        - track the r/w sets of txns and store their writes in a provate workspace.
+        - DBMS copies every tuple that the txn accesses from the shared database to its workspace ensure repeatable reads
+      - Validation Phase
+        - when a txn commits, check whether it conflicts with other txns.
+        - Approaches:
+          - Backward Validation - check whether committing txn intersects its read/write sets with those of any txns that have already committed.
+          - Forward Validation - check whether the committing txn intersects its read/write sets with any active txns that have not yet committed.
+      - Write Phase
+        - if validation succeeds, apply private chnages to database, otherwise abort and restart the txn.
+        - Serial Commits: use a global latch to limit a single txn to be in the Validation/Write phases at a time.
+        - Parallel Commits: use fine-grained write latches to support parallel validation/Write phases
+                            txns acquire latches in primary key order to avoid deadlocks.
+    - OCC works well when the # of conflicts is low
+    - High overhead for copying data locally
+    - Validation/Write phase bottlenecks
+    - Aborts are more wasteful that in 2PL because they occur after a txn has already executed.
     
+  - Dynamic Databases
+    - We have only dealt with transactions that read and update existing objects in the database.
+    - But now if txns perfomr inserts, updates and deletions, we have new problems.
+    - Phantom reads
+      - tuples can appear and disappear as txns are running.
+      - Approach:
+        - Re-execute scans.
+          - tracks the WHERE clause for all queries that the tcn executes.
+            - retain the scan set for every range query in a txn.
+          - upon commit, re-execute just the scan portion of each query and check whether it generates the same result.
+        - Predicate Locking
+          - HyPer DB.
+          - In memory systems.
+        - Index Locking Schemes
+          - Key-Value Locks
+            - locks that cover a single key-value in an index.
+            - need virtual keys for non-existant values.
+          - Gap Locks
+            - each txn acquires a key-value lock on the single key that it wants to access, then get a gap lock on the next key gap.
+          - Key-Range Locks
+            - locks that cover a ley value and the gap to the next key value in a single index
+          - Hierarchical Locking
+            - allow for a txn to hold a wider key-range locks with different locking modes.
+              - reduces the number of visits to lock manager.
+      - Weaker levels of isolation
+        - Serializability is useful because it allows programmers to ignore concurrency issues.
+        - But enforcing it may allow too little concurrency and limit performance
+        - We may want to use a wekaer level of consisitency to improve scalability.
+      
+      - Isolation Levels
+        - Controls the extent that a txn is exposed to the actions of other concurrent txns
+        - Provides for greater concurrency at the cost of exposing txns to uncommitted changes
+          - Dirty Reads
+          - Unrepeatable Reads
+          - Phantom Reads
+        - Levels:
+          - Serializable: No phantoms, all reads repeatbal, no dirty reads.
+          - Repeatable Reads: Phantoms may happen.
+          - Read Committed: Phantoms and unrepeatable reads may happen.
+          - Read Uncommitted: All of them may happen.   
+        - How to obtain:
+          - Serializable: Obtain all locks first, plus index locks, plus strict 2PL.
+          - Repeatable Reads: Same as above but no index locks.
+          - Read Committed: Same as abov, but S locks are released immediately.
+          - Read Uncommitted: Same as above but allows dirty reads(no S locks).
+        
+## Multi-Version Concurrency Control
+  
+  - DBMS maintains multiple physical versions of a single logical object in the database.
+    - When a txn writes to an object, the DBMS creates a new verison of that object.
+    - When a txn reads an object, it reads the newest version that existed when the txn started.
+  - First implemented was db/VMS.
+  - Firebird.....influenced firefox browser naming.
+  - Key ideas:
+    - Writers do not block readers.
+    - Readers do not block writers
+    - Read-nly txns can read a consistent snapshot without acquiring locks.
+      - use timestamps to determine visibility.
+    - Easily support time-travel queries
+  - Snapshot Isolation
+    - when a txn starts, it sees a consistent snaphot of the database that existed when that txn started.
+      - No torn writes from active txns
+      - If two txns update the same object, then forst writer wins
+    - Susceptible to the *Write Skew Anomaly*.
+  - MVCC is more than just a concurrency control protocol. It completely affets how the DBMS manages transactions and the database.
+  - Concurrency control protocol
+    - Timestamp Ordering
+    - Optimistic Concurrency Control
+    - Two-phase Locking
+  - Version Storage
+    - DBMS uses the tuples pointer field to create a version chain per logical tuple
+      - this allows the DBMS to find the version that is visible to a particular txn at runtime.
+      - Indexes always point to the head of the chain.
+    - Different storage schemes determine where/what to store for each version
+    - Approach:
+      - Append-Only Storage
+        - new versions are appended to the same table space.
+        - on every update, append a new version of the tuple into an empty space in the table.
+        - Version chain ordering
+          - oldest to newest
+          - Newest to Oldest
+      - Time-Travel Storage
+        - old versions are copied to separate table space.
+      - Delta Storage
+        - original values of the modified attributes are copied into a separate delta record space.  
+        - Overwrite the master version
+        - Store the delta values.
+  - Garbage Collection
+    - DBMS needs to remove reclaimable physical versions from the database over time
+      - No active txn in the DBMS can see that version
+      - the version was created by an aborted txn
+    - Two additional desgin decisions
+      - How to look for expired versions
+      - How to decide when it is safe to reclaim memory.
+    - Approach:
+      - Tuple-level
+        - Find old versions by examining tuples directly
+        - Background Vacuuming.
+          - Separate threads periodically scan the table and look for reclaimable versions. Works with any storage.
+          - Dirty Block bitMap.
+        - Cooperative Cleaning.
+          - worker threads ideally scan reclaimable versions as they traverse tuples on operations.
+          - only works with Oldest to Newest
+      - Transactions level GC
+        - Each txn keeps track of its read/write set
+        - On commit/abort, the txn provides this information to a centralized vacuum worker.
+        - DBMS periodically dtermines when all versions created by a finished txn are no longer visible.
+      - Index management 
+        - Primary key indexes point to version chain head
+          - How often the DBMS must update the pkey index depends on whether the system creates new versions when a tuple is updated.
+          - If a txn updates a tuple's pkey attributes then this is treated as a DELETE followed by an INSERT.  
+        - Secondary Indexes are more complicated.
+        *READ WHY UBER SWITCHED FROM POSTGRES TO MYSQL*
+          - Approach:
+            - Logical Pointers
+              - use a fixed indentifier per tuple that does not change
+              - requires an extra indirection layer
+              - Primary Key vs Tuple Id
+            - Physical Pointers
+              - Use the physical address to the version chain head.
+        - MVCC Indexes
+          - MVCC DBMS indexes usually do not store version information about tuples with their keys
+            - exception: Index-organized tables(MySQL)
+          - Every index must support deuplicate keys from different snapshots
+            - the same key may point to different logical tuples in different snapshots.
+      - Transaction-level
+        - Txns keep track of their old versions os the DBMS does not have to scan tuples to determine visibility
     
+
+## Database Logging and Shadow Paging
+
+  - Crash Recovery
+    - Recovery algorithms are techniques to ensure database consistency, transaction atomiticy and durability despite dailures     
+    - Recovery algorithms have two parts
+      - Actions during normal txn processing to ensure that the DBMS can recover from a failure.
+      - Actions after a failure to recover the database to a state that ensures atomicity, consistency and durability.
+  - DBMS is divided into different components based on the underlying storage device
+    - Volatile
+      - data does not persist after power loss or program exit
+      - DRAM, SRAM
+    - Non-volatile
+      - data persists after power loss and program exit
+      - HDD, SDD
+    - Stable Storage
+      - a non-existent form of non-volatile storage that survives all possible failure scenarios
+    - We must also classify the different types of failures that the DBMS needs to handle.
+  - Failure Classification
+    - Transaction Failures
+      - Logical Errors
+        - txn cannot complete due to internal error condition(integrity constraint violation)
+      - Internal State Errors
+        - DBMS must terminate an active transaction due to an error condition(deadlock)
+    - System Failures
+      - Software Failures
+        - problem with the OS or DBMS implementation(divide-by-zero exception)
+      - Hardware Failure
+        - Computer hosting the DBMS crashes.
+        - Fail-stop Assumption: Non-volatile storage contents assumed to not be corrupted by system crash.
+    - Storage media Failures
+      - Non-repairable Hardware Failure
+        - a head crash or similar disk failure destroys all or part of non-volatile storage
+        - destruction is assumed to be detectable, (disk controller use checksums to detect failures)
+      - No DBMS can recover from this! Database must be restored from archived versions.
+  - Observation
+    - The DBs primary storage location is on volatile storage but it is slower than volatile storage.Use volatile memory for faster access
+      - First copy target record into memory
+      - Perform the writes in memory
+      - Write dirty records back to disk.
+    - The DBMS needs to ensure the following
+      - The changes for any txn are durable once the DBMS has said its committed.
+      - No partial changes are durable if the txn aborted.
+  - Undo vs Redo
+    - Undo: Process of removing the effects of an incomplete or aborted txn.
+    - Redo: Process of re-applying the effects of a committed txn for durability.
+  - How the DBMS supports this functionality depends on how it manages the buffer pool.
+    - Steal Policy
+      - Whether the DBMS allows an uncommitted txn to overwrite the most recent committed value of an object in non-volatile storage.
+    - Force Policy
+      - Whether the DBMS requires that all updates made by a txn are reflected on non-volatile storage before the txn can commit.
+    - No Steal + Force
+      - Easiest approach to implement.
+        - Never have to undo changes of an aborted txn because the changes were not written to disk
+        - Never have to redo changes of a committed txn because all changes are guaranteed to be written to disk at commit time
+      - Cannot support write sets that excedd the amount of physical memory available.
+    - Shadow Paging
+      - Instead of copying the entire database, the DBMS copies pages on write to create two versions:
+        - Master: contains only changes form committed txns
+        - Shadow: Temporary db with chnages made form uncommitted txns
+      - Buffer Pool Policy: No-steal + Force
+      - To install updates when a txn commits, overwrite the root so it points to the shadow, thereby swapping the master and shadow.
+      - Supporting rollbacks and recovery is easy.
+      - Disadvantages:
+        - Copying the entire page tbale is expensive
+          - use a page table structured like a B+ TREE
+          - No need to copy entire tree, only need to copy path in the tree that lead to updated leaf nodes
+        - Commit overhead is high
+          - Flush every updated page, page table and root
+          - Data gets fragmented(bad for sequential scsns)
+          - Need garbage collections
+          - Only supports one writer txn at a time or txns in a batch. 
+      - SQLITE(PRE-2010)
+        - rollback mode.
+        - use a journal file
+    - We need a way for the DBMS convert random writes into sequential writes
+    - Write-Ahead Log
+      - maintain a log file separate from data files that contains the changes that txns make to database
+        - assume the log is on stable storage
+        - log contains enough information to perform the necessary undo and redo actions to restore the database
+      - DBMS must write to disk the log file records that correspond to changes made to a db object before it can flush that object to disk
+      - Buffer Pool Policy: Steal + No-force
+      - WAL Protocol
+        - DBMS stages all a txns log records in volatile storage(backed by buffer pool)
+        - All log records pertaining to an updated page are written to non-volatile storage before the page itself is over-written in no-volatile storage
+        - A txn is not considered committed until all its log records have been written to stable storage.
+        - Write a begin record to the log for each txn to mark its starting point.
+        - When a txn finishes, DBMS will:
+          - Write a commit record on the log
+          - Make sure that all log records are flushed before it returns an ack to application.
+        - Each log entry contains information about the change to a single object
+          - Transaction ID
+          - Object ID
+          - Before Value(UNDO)
+          - After Value(REDO)
+      - Flushing the walog buffer to disk every time a txn commits will become a bottleneck
+      - DBMS can use the group commit optimization to batch multiple log flushes together to amortize overhead.
+      - Almost every DBMS uses No-force+Steal.
+      - Logging Schemes
+        - Physical Logging
+          - Record the byte-level changes made to a specific page
+          - e.g git diff
+        - Logical Logging
+          - Record the high-level operations executed by txns
+          - e.g UPDATE, DELETE and INSERT
+        - Physiological Logging
+          - Hybrid approach with byte-level changes for a single tuple identified by page id+slot number
+          - Does not specify organization of the page.
+        - Logical logging requires less data written in each log record than physical loggin
+        - Difficult to implement recovery with logical loggin if you have concurrent txns running at lower isolation levels
+          - Hard to determine whihc parts of the db may have been modified by a query beofre crash.
+          - Also takes longer to recover because you must re-execute every txn all over again.
+      - Log-structured systems
+        - Do not have dirty pages
+          - any page retrieved from disk is immutable
+        - DBMS buffers log records in in-memory ages(MemTable), If this buffer is full, it must be flushed to disk. But it may contain changes, uncommitted txns
+        - DBMS still maintain a separate WAL to recreate the MemTable on crash.
+      - Checkpoints
+        - WAL will grow forever
+        - After a crash, the DBMS must replay the entire log, which will take a long time.
+        - DBMS periodically takes a checkpoint where it flushes all buffers out to disk.
+          - Provides a hint on how far back it needs to replay the WAL after a crash.
+        - Blocking/Consistent Checkpoint Protocol
+          - Pause all queries.
+          - Flush all WAL records in memory to disk.
+          - Flush all modified pages in buffer pool to disk
+          - Write a CHECKPOINT entry to WAL and flush to disk.
+          - Resume queries.
+        - Scanning the log to find uncommitted txns can take a long time.
+        - How often the DBMS should take checkpoints depends on many different factors.
+          - Frequency
+          - Tunable option that depends on application recovery time requirements
+          
+## Database Recovery
+  
+  - ARIES: Algorithms for Recovery and Isolation Exploiting Semantics.
+  *look and read paper by the same name*
+    - Main Ideas
+      - Write-Ahead Logging
+        - Any chnage is recorded in log on stable storage before the database change is written to disk
+        - Must use STEAL+NO-FORCE buffer pool policies.
+      - Repeating History during Redo
+        - On DBMS restart, retrace actions and restore database to exact state before crash.
+      - Logging Changes During Undo
+        - Record undo actions to log to ensure actions is not repeated in the event of repeated failures.
+    - WAL Records
+      - We need to extend our log record format from last class to include additional info
+      - Every log record now includes a gloablly unique log sequence number(LSN)
+        - LSN represent the physical order that txns make chnages to the database
+      - Various components in the system keep track of LSNs that pertain to them.
+      - Log Sequence Number
+        - flushedLSN - Memory - Last LSN in log on disk
+        - pageLSN - page(x) - Newest update to page(x)
+        - recLSN - page(x) - Oldest update to page(x) since it was last flushed.
+        - lastLSN - T(i) - Latesst record  of txn
+        - MasterRecord - Disk - LSN of latest checkpoint.
+      - Before the DBMS can write page X to disk, it must flush the log at least to the point where: pageLSN <= flushedLSN
+      - Writing Log records
+        - All log records have an LSN.
+        - Update the pageLSN every time a txn modifies a record in the page.
+        - Update the flushedLSN in memory every time the DBMS writes out the WAL buffer to disk.
+      - Normal Execution
+        - Each txn invokes a sequence of reads and writes, followed by commit or abort.
+        - Assumptions
+          - All log records fit within a single page.
+          - Disk writes are atomic
+          - Single-versioned tuples with strong strict 2PL.
+          - STEAL + NO-FORCE buffer management with WAL
+        - Transaction commit
+          - When a txn commits, the DBMS writes a COMMIT record to log and guarantees that all log records up to txns COMMIT record are flushed to disk.
+            - Log flushes are sequential, synchronous writes to disk.
+            - Many log records per log page.
+          - When the commit succeeds, write a special TXN-END record to log.
+            - Indicates that no new log record for a txn will appear in the log ever again.
+            - This does not need to be flushed immediately.
+        - Transaction Abort
+          - Abort a txn is a special case of the ARIES undo operation applied to only one txn.
+          - We need to add another field to our log records:
+            - prevLSN: the previous LSN for the txn.
+            - This maintains a linked-list for each txn that mkes it easy to walk through its records.
+          - Compensation Log records
+            - A CLR describes the actions taken to undo the actions of a previous update record.
+            - It has all the fields of an update log record plus the undoNext pointer(the next-to-be-undone LSN).
+            - CLRs are added to log records but the DBMS does not wait for them to be flushed before notifying the application that the txn aborted.
+          - Abort Algorithm
+            - First write an ABORT record to log for the txn.
+            - Then analyze the txn updates on reverse order.
+            - For each update record:
+              - Write a CLR entry to the log.
+              - Restore old value.
+            - Lastly, write a TXN-END record and release locks.
+            - Notice: CLRs never need to be undone.
+      - Non-fuzzy checkpoints
+        - DBMS halts everything when it takes a checkpoint to ensure a consistent snapshot
+          - Halt the start of any new txns
+          - Wait until all active txns finish executing
+          - Flushes dirty pages on disk.
+        - This is bad for runtime performance but makes recovery easy.
+      - Btter way to checkpoints
+        - pause modifying txns while the DBMS takes the checkpoint.
+          - prevent queries from acquiring write latch on table/index pages
+          - dont have to wait until all txns finish beofre taking the checkpoint
+        - to prevent torn pages
+          - we must record internal state as of the beginning of the checkpoint
+            - Active Transaction Table(ATT)
+              - One entry per currently active txn
+                - txnId: Unique txn identifier
+                - status: Current mode of the txn.
+                - lastLSN: Most recent LSN created by txn
+              - Remove entry after the TXN-END record
+              - Transaction Status Codes
+                - R - Running
+                - C - Committing
+                - U - Candidate for Undo
+            - Dirty Page Table(DPT) 
+              - Keep track of which pages in the buffer pool contain changes that have not been flushed to disk.
+              - One entry per dirty page in the buffer pool
+                - recLSN: The LSN of the log record that first caused the page to be dirty.
+      - Fuzzy Checkpoints 
+        - A fuzzy checkpoint is where the DBMS allows active txns to continue the run while the system writes the log records for checkpoint
+          - No attempt to force dirty pages to disk.
+        - New log records to track checkpoint boundaries
+          - CHECKPOINT-BEGIN: Indicates the start of checkpoint
+          - CHECKPOINT-END:   Contains ATT + DPT
+          - Any txn that begins after the checkpoint start is excluded form the ATT in the CHECKPOINT-END record
+          - The LSN of the CHECKPOINT-BEGIN record is written to the MasterRecord when it completes.
+        - ARIES - Recovery Phases
+          - Analysis
+            - Examine the WAL in forward direction starting at MasterRecord to identify dirty pages in the buffer pool and active txns at the time of the crash.
+            - Figure out which txns committed or failed since last successful checkpoint
+              - If DBMS finds a TXN-END record, remove its corresponding txn from ATT.
+              - All other records:
+                - If txn not in ATT, add it with status UNDO.
+                - On commit, change txn status to COMMIT.
+              - For update log records
+            - At end of Analysis Phase
+              - ATT identifies which txns were active at time of crash
+              - DPT identifies which dirty pages might not have made it to disk.
+          - Redo
+            - Repeat all actions starting from an appropriate point in the log(even txns that will abort)
+            - Goal is to repeat history to recnstruct the database state at the moment of the crash
+              - reapply all updates, even aborted txns and redo CLRs
+            - There are techniques that allow the DBMS to avoid unnecessary reads/writes.....*look into this*
+            - Scan forward form the log record containing smallest recLSN in DPT.
+            - For each update log record or CLR with a given LSN redo the action unless
+              - Affected page is not in DPT or
+              - Affected page is in DPT but that record's LSN is less than the page's recLSN.
+            - To redo an action
+              - Reapply logged uodate
+              - Set pageLSN to log records LSN.
+              - No additional logging, no forced flushes
+            - At the end of Redo Phase, write TXN-END log records for all txns with status C and remove them from the ATT.
+          - Undo
+            - Reverse the actions of txns that did not commit before the crash.
+            - Undo all txns that were active at the time of crash and therefore will never commit
+              - these are all the txns with U status in the ATT after the Analysis Phase
+            - Process them in reverse LSN order using the lastLSN to speed up traversal
+            - Write a CLR for every modification.
+        - What does the DBMS do if it crashes during recovery in the Analysis Phase?
+          - Nothing. Just run recovery again.
+        - What does the DBMS do if it crashed during recovery in the Redo Phase?
+          - Agian nothing. Redo everything again.
+        - How can the DBMS improve performance during recovery in the Redo Phase?
+          - Assume that it is not going to crash again and flush all changes to disk asynchronously in the background.
+        - How can the DBMS improve performance during recovery in the Undo Phase?
+          - Lazily rollback changes before new txns access pages
+          - Rewrite the application to avaoid long-runnig txns.
+          
+## DIstributed Databases
+
+  - Characteristics
+    - Nodes can be far from each other.
+    - Nodes connected using public netwrok.
+  - Use the building blocks that are covered in single node DBMS to now support transaction processing and query execution in distributed environments.
+  - A distributed DBMS system arcitecture specifies what shared resources are directly accessible to CPUs
+  - This affects how the CPUs coordinate with each other and where they retrieve/store objects in the database.
+  - System Architectures
+    - Shared Everything
+    - Shared Memory
+      - CPUs have access to common memory address space via a fast interconnect
+        - each processor has a global view of all the in-memory data structures
+        - each DBMS instance on a processor must "know" about the other instances
+    - Shared Disk*
+      - CPUs can access a single logical disk directly via an interconnect, but each have their own private memories
+        - can scal execution layer independently form storage layer
+        - must send messages between CPUs to learn about their current state.
+      - Any OLAP DB in use now.
+    - Shared Nothing*
+      - Each DBMS instance has its own CPU, memory and local disk
+      - Node only communicate with each other via network  
+        - Harder to scale capacity
+        - Harder to ensure consistency
+        - Better performance and efficiency.
+  - Design Issues
+    - How does the application find data?
+    - Where does the application send queries?
+    - How to execute queries on distributed data?
+      - Push query to data.
+      - Pull data to query.
+    - How does the DBMS ensure correctness?
+    - How do we divide the database across resources?
+  - Homogenous Nodes
+    - Every node in the cluster can perform the same set of tasks(albeit on potentially different partitions of data)
+    - Makes provisioning and failover easier.
+  - Heterogenous Nodes
+    - Nodes are assigned specific tasks
+    - Can allow a single physical node to host multiple "virtual" node types for dedicated tasks.
+  - Data Transperancy
+    - Apps should not be required to know where data is physically located in a distributed DBMS
+      - query on a single node should have same results as distributed db.
+  - Database Partitioning
+    - Split database across multiple resources
+      - Disks, nodes, processors
+      - Often called "Sharding"
+    - DBMS executes query fragments on each partition and then combines the results to produce a single answer.
+    - DBMS can partition physically(shared nothing) or logically(shared disk)
+    - Naive TABLE pARTITIONING
+      - Assign an entire table to a single node.
+      - Assume that each node has enough storage space for an entire table
+      - Ideal if queries never join data across tables stored on different nodes and access patterns are uniform.
+    - Vertical Partitioning
+      - Split a table's attributes into separate partitions.
+      - Must store tuple information to reconstruct the original record
+    - Horizontal Partitioning
+      - Split a table's tuples into disjoint subsets based on some partitioning key and scheme
+        - choose column that divided the datase equally in terms of size, load, usage
+      - Partitioning schemes
+        - Hashing
+        - Ranges
+        - Predicates
+    - Logical Partitioning vs Physical Partitioning
+    - Consistent Hashing*
+      - Solution to rehashing on mod change.
+      - Learn more about this.
+    - Single Node vs Distributed
+      - A distributed txn accesses data at one or more partitions
+        - Requires expensive coordination.
+    - Transaction Coordination
+      - Need a way to coordinate their execution on the system if our DBMS supports multi-operation and distributed txns.
+      - Two different approaches
+        - Centralized: Global "traffic cop".
+          - TP Monitor: X/Open XA.
+          - Middleware: Vitess, planetscale, mongoDB
+        - Decentralized: Nodes organize themselves.
+          - Leader election type.
+    - Distributed Concurrency Control
+      - Need to allow multiple txn to execute simultaneously across multiple nodes.
+        - many of the same protocols from single node DBMSs can be adapted 
+      - This is harder because of
+        - Replication
+        - Network Communication Overhead
+        - Node failures
+        - Clock Skew
+        
+    
+            
+      
