@@ -6,7 +6,7 @@ Ref:
 `Expert Mysql`
 `Database System Concepts 7th Edition`
 `CMU: Intro to Databases Systems`
-
+`Mysql for Developers: Aaron@planetscale.com`
 
 
 ## Introduction
@@ -75,6 +75,322 @@ Ref:
 - EXISTS
 - Window Functions
 - Common Table Expressions - auxiliary statements for use in larger query.
+
+## MYSQL SERIES
+
+### SCHEMA
+
+- Choose smallest data type for your data.
+- Schema should be honest and represent your data.
+  - Integers
+    - TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT.
+    - Stored in increasing 1 byte apart from BIGINT which is 8 bytes.
+    - Should also specify signed or unsigned.
+    - Number in bracket does nothing to size.
+
+  - Decimals
+    - Store numbers with decimal parts
+    - DECIMAL(exact), FLOAT(approximation)
+    - decimal(10,4)
+    - double is bigger than float, 8 to 4 bytes.
+  
+  - Strings
+    - CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, SET.
+    - CHAR(fixed length), VARCHAR(variable length)
+    - keep eye on collations when choosing character sets.
+    - BINARY mainly used to store hashes.
+    - TEXT, BLOB - large amount of data in character or binary format.
+    - Only select them when you need them.
+  
+  - Enums
+    - range of values a column can take.
+    - sorts by enum position integer starting at 1.
+    
+  - Dates
+    - DATE(3), DATETIME(8), TIMESTAMP(4), YEAR(1), TIME(3).
+    - TIMESTAMP - (1970 - 2038-01-19)
+    - set session timezone.
+    - TIMESTAMP preffered when it comes to storing and retrieving timezone sensitive data.
+    - CURRENT_TIMESTAMP attribute on column, on update too.
+  
+  - JSON
+    - Mysql validates json.
+    - Special functions for working with json.
+    - can't index on entire json document.
+  
+  - Unexpected types
+    - Booleans sameas tinyint
+    - Zip codes char(10)
+    - IpAddress - function to work with ip-addresses. check them out.
+  
+  - Gnerated columns
+    - use AS(function to obtain value form another column)
+    - better than relying on application code to handle this
+    - read more on this.
+    - has to be deterministic.
+    - Stored vs Virtual.
+  
+  - Schema migrations
+    - maintanable, sharable chnage to schema
+    
+```sql
+
+TINYINT    - 1  - -128
+SMALLINT   - 2  - -32768
+MEDIUMINT  - 3  - -8388608
+INT        - 4  - -2147483648
+BIGINT     - 8  - -2^63
+
+```
+
+### INDEXES
+
+- A separate data structure that maintains a copy of part of your data and points back to row.
+- Create as many as you need but as few as you can get away with.
+- Queries should drive the number and kind of indexes you need.
+
+  - B+ Tree
+    - most common index ds.
+  
+  - Primary Keys
+    - Indexes are automatically created for primary keys.
+    - Always no nullable.
+    - Unsigned, Auto_increment.
+    - One per table.
+    - determine how table is stored on disk, is the table.
+    - clustered index.
+  
+  - Secondary keys
+    - Any index that is not the primary key.
+    - Secondary index has pointer to the primary index.
+  
+  - Primary Key data types
+    - have room to grow.
+    - keep an eye on size of index.
+    - unsigned bigints
+    
+  - Where to add indexes
+    - Effective indexes for each query.
+    - EXPLAIN keyword to get a glimpse into how query is run.
+    - use EXPLAIN to see which indexes are used per query.
+    - order, group, ranges, bounded ranges
+  
+  - Index selectivity
+    - cardinality, 
+    - column with few distinct values not perfect candidate for indexes.
+  
+  - Prefix indexes
+    - possible to create an index on only a portion of a column.
+    - use selectivity off the full index to determine how close you can get to original index selectivity by just indexing part of column.
+    - can't be used to sort
+  
+  - Composite index
+    - indexes on multiple columns
+    - order of definiton crucial to query performance.
+    - access is left-to-right, no skipping, stops at first range
+    - key-len column on index table.
+    - access patterns crucial to consider when defining ci.
+  
+  - Covering Indexes
+    - is a regular index in a special situation.
+    - when an index supplies all a given query requires.
+  
+  - Functional Indexes
+    - Index on a function, index something you can't quite reach.
+    - when you wrap a column in a function, MYSQL has no idea what's in there, blackbox essentially.
+    - case of index obsufication.
+    - *case sensitive collation* works well for comparison.
+    - `alter table users add index m((month(birthday)))`
+    - Mysql: 8 and beyond, 5 : use generated column index
+    
+  - Indexing JSON columns
+    - No way to index an entire JSON column in MySQL
+    - `json ->> '$.email'` generated column, unquoting operator
+    - Careful with collation here even after CAST.
+    
+  - Indexing for wildcard searches
+    - when searching for substring in a column, indexes can still be used but only unitl the first wildcard.
+    - 
+  
+  - Fulltext Indexes
+    - Mysql supports Fulltext searching although not as good as purpose built FTS tools.
+    - add fulltext keyword
+    - syntax match(a,b,c) against (expression)
+    - BOOLEAN mode and NORMAL LANGUAGE mode
+    - relevancy score
+    
+  - Invisible indexes
+    - Before you drop an index, you cna make an index invisible to test effects of removing it.
+  
+  - Duplicate indexes
+    - Because of the way composite indexes work, you may have duplicate and redundant indexes defined.
+    
+  - Foreign Keys
+    - Not the same as foreign key constraints
+    - Allows one to reference data in another table.
+    - Constraints check for referential integrity
+    - column types have to be the same type.
+    - on delete cascade/set null, on update cascade/set null.
+    - constraint in application code.
+    
+
+### QUERIES
+    
+  - EXPLAIN
+    - Learn to read and interpret the EXPLAIN statement.
+  
+  - Explain access type
+    - Const - unique look up
+    - Ref - index use
+    - range - equality
+    - index - scan entire index
+    - all - scan entire table.
+    - look them up in documentation.
+  
+  - Explain Analyze
+    - gives more detail to work with as compared to traditional EXPLAIN output.
+    - can change format i.e format=tree, format=json
+    - explain analyze runs the query
+  
+  - Index Obfuscation
+    - happens when you wrap a column with a function.
+    - always work on the right side of the query to avoid this, leave column alone.
+  
+  - Redundant and Approximate conditions
+    - Impossible to index a condition correctly.
+    - Use a redundant condition to help narrow down records quickly.
+    - should be logically correct.
+    
+  - Select only what you need.
+    - especially for large data format fields.
+    - check ActiveRecord model for hrams of this.
+    - invisible keyword to exclude from default SELECT * unless explicitly called.
+ 
+  - Limiting rows
+    - onyl return rows to remain performant.
+    - look for calculations or operations that can be done in the DB.
+    - slect count(*) and select *
+    - accompany your LIMIT with ORDER BY.
+    
+  - Joins
+    - `select * from users(left table) join locations(right table) on users.id=locations.manager_id;`
+    - default is inner join(left matches right and has results on both)
+    - left join(all results on left table)
+    - right join(all results on right table)
+  
+  - Indexing Joins
+    - combining joins efficiently.
+    - *relook at this
+
+*chapter 8 of MySql documentation on optimization*
+
+  - Subqueries
+    - can be used in place of joins.
+    - used to either include or remove results of a query based on another query,
+    - semi-join, anti-join
+    - where exists, where not in,
+    
+  - Common Table Expressions(CTEs)
+    - powerful way to refactor complicated queries into more readbale versions.
+    - with table_name as (insert query)
+    - run only once.
+  
+  - Recursive CTEs
+    - CTE that references itself 
+    - can be used to generate new data or work with existing data.
+    - use recursive keyword.
+  
+  - Unions
+    - puts the results one on top of the other as opposed to joins which match them.
+    - union all ignores duplicates
+    - 
+  
+  - Window Functions
+    - Allow you to work on a subset of rows related to the current row while query is being processed.
+    - row_number() over()
+    - produce ranked lists, 
+    - named windows
+    - maintains individual rows even after processing
+  
+  - Sorting and Limiting
+    - order by....default asc
+    - limit ... not deterministic.
+  
+  - Sorting with indexes
+    - don't sort your rows if you dont need them sorted.
+    - either via index or after results have been returned(filesort).
+    - can create a desc index.
+    
+  - Sorting with composite indexes
+    - order remains ad definition.
+    - index and query have to be the same.
+  
+  - Counting results
+    - count(*) - count as fast as you can.
+    - include a function inside count function
+    
+  - Dealing with NULL
+    - use <=> operator to get NULL out of column.
+    - also called null safety operator.
+    - ifnull(), coalesce(preffered, default, fallback)
+
+### MISC EXAMPLES
+
+  - MD5 Hash
+    - create a very fast lookup on very large values.
+    - can work on multiple columns
+    - GENERATED ALWAYS AS()
+    - good for strcit equality and constraint esp on logical units across columns
+  
+  - Bitwise Operations
+    - use the 8 bits to represent different states i.e flags
+    - implementation side vs interface side.
+    - *very cool stuff*
+  
+  - Timestamps versus booleans
+    - when storing a boolean it is sometimes desirable to know when it was turned on/off.
+    - timestamp null
+    - *look more*
+    
+  - Claiming rows
+    - application needs to claim rows for processing.
+    - set owner
+    
+  - Summary table
+    - also known as rollup table.
+    - (*)
+    
+  - Meta Tables
+    - wide tables with many columns can be expensive to query and maintain.
+    - makes sense to put them in a secondary table.
+    - blob, json ,text columns for example.
+    
+  - Offset limit pagination
+    - has to be deterministic.
+    - 
+    - Offset/limit method most common.
+    - pages may drift as they are looking at them.
+    - formula = page * offset.
+    - to show pages have to know how many they are.
+    - next button reliant on whether an extra record exists.
+  
+  - Cursor pagination
+    - keep track of some record of state...i.e id, token.
+    - can't directly address a page
+    - great for infinite scroll.
+    - anything you order by should be in cursor
+  
+  - Deferred Joins
+    - offset/limit performant as you reach deeper pages.
+    - 
+  
+  - Geographic searches
+    - ST_DISTANCE_SPHERE function
+    - bouding box of a point.
+    
+    
+      
+
 
 ## Anatomy of a DB.
 
@@ -1835,6 +2151,327 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - Node failures
         - Clock Skew
         
-    
-            
+## OLAP VS OLTP
+ 
+  - On-line Transaction Processing(OLTP)
+    - Short-lived read/write txns
+    - Small footprint
+    - Repetitive operations
+  
+  - On-line Analytical Processing   
+    - Long-running read-only queries
+    - Complex joins
+    - Exploratory queries.
+
+### OLTP
+          
+  - How to ensure that all nodes agree to commit a txn and then make sure it does commit if we decide that it should.
+    - What happends if a node fails?
+    - What happens if our messages show up late?
+    - What happens if we dont wait for every node to agree?
+  
+  - Assume all nodes in a distributed DBMS are well-behaved and under the same administrative domain
+    - If we tell a node to commit a txn, then it will commit the txn(if there is no failure)
+  - If you dont trust the other nodes in a distributed DBMS you need to use a BYzantine Fault Tolerant protocol for txns.
+  
+  - Atomic Commit Protocol
+    - when a multinode txn finishes, the DBMS needs to ask all the nodes involved whether it is safe to commit
+    - Examples:
+      - Two-Phase commit*
+        - Each node records the inbound/outbound messages and outcome of each phase in a non-volatile storage log
+        - On recovery examine the log for 2PC messages
+          - if txn is in prepared state, contact coord.
+          - if txn is not in prepared, abort it.
+          - if txn was committing and node is cood, send COMMIT message to nodes.
+        - 2PC Optimizations
+          - Early Prepare Voting
+            - nide return query result if it knows no other query will run there.
+          - Early Acknowledge After Prepare
+            - if all nodes vote to commit a txn, coord can send client an ack that their txn was successful before the commit phase finishes.
+      - Three-Phase commit
+      - Paxos*
+        - Consensus protocol where a coord proposes an outcome(commit or abort) and then the participants vote on whether that outcome should succeed.
+        - Does not block if a majority of participants are available and has provably minimal mesasge delays in the best case.
+        - *PAXOS MADE LIVE*
+        - K-safety - minimal number of required partitions.
+        - Multi-Paxos
+          - if the system elects a single leader that oversees proposing changes for some period then it can skip the propose phase.
+            - fall back to full Paxos whenever there is a failure
+          - The system periodically renews the leader(known as a lease) using another Paxos round
+            - Nodes must exchange log entries during leader election to make sure that everyone is up-to-date.
+        - 2PC vs Paxos
+          - 2PC
+            - Blocks if coord fails after the prepapre message is sent, until coodinator recovers.
+          - Paxos
+            - Non-blocking if a majority participants are alive. provided there is a sufficiently long period without further failures.
+      - Raft
+      - ZAB(Zookeeper)
+      - Viewstamped Replication
+  - Replication
+    - The DBMS can replicate data across redundant nodes to increase availability.
+    - Design decisions:
+      - Replica configuration
+        - Approach:
+          - Primary-Replica
+            - All updates go to a designated primary for each object.
+            - The primary propagates updates to its replicas without an atomic commit protocol.
+            - Read-only txns may be allowed to access replicas.
+            - If the primary goes down, then hold an election to select a new primary.
+          - Multi-Primary
+            - Txns can update data objects at any replica.
+            - Replicas must synchronize with each other using an atomic commit protocol.
+        - K-Safety
+          - Threshold for determining the fault tolerance of the replicated database.
+          - The value K represents the number of replicas per data object that must always be available.
+          - If the number of replicas goes below thos threshold then DBMS halts execution and takes itself offline.
+      - Propagation scheme
+        - When a txn commits on a replicated database, the DBMS decides whether it must wait for that txn changes to propagate to other nodes before it can send ack to application
+        - Propagation Levels:
+          - Synchronous (Strong Consistency)
+            - The primary sends updates to replicas and then waits for them to ack that they fully applied(logged) the changes.
+          - Asynchronous (Eventual Consistency)
+            - The primary immediately returns the ack to the client without waiting for replicas to apply the changes.
+            - Mostly used.
+      - Propagation Timing
+        - Approach
+          - Continuous
+            - DBMS sends log messages immediately as it generates them.
+            - Also need to send a commit/abort message.
+          - On Commit
+            - DBMS only sends the log messages for a txn to the replicas once the txn is commits
+            - Do not waste time sending log records for aborted txns
+            - Assumes that a txn log record fits entirely in memory.
+      - Update Method
+        - Approach
+          - Active-Active
+            - a txn executes at each replica independently
+            - need to check at the end whether the txn ends up with the same result at each replica
+          - Active-Passive
+            - each txn executes at a single location and propagates the changes to the replica
+            - either do physical or logical replication.
+            - not the same as primary-replica vs multi-primary
+      - Google Spanner
+        - Google geo-replicated DBMS
+        - Schematized, semi-relational data model
+        - Decentralized shared-disk architecture
+        - Log-structured on disk storage
+        - Cooncurrency Control
+          - Strict 2PL + MVCC + Multi-Paxos + 2PC
+          - Wound-Wiat Deadlock Prevention.
+          - Externally consistent global write-transactions with synchronous replication
+          - Lock-free read-only transactions.
+          - DBMS ensures ordering through globally unique timestamps generated form atomic clocks and GPS devices.
+          - Database is broken up into tablets(partitions)
+            - Use Paxos to elect leader in tablet group
+            - Use 2PC for txns that span tablets.
+        - Transaction Ordering
+            - DBMS orders transations based on physical "wall clock" time.
+            - Guarantee strict serializability.
+            - If T1 finishes before T2 then T2 should see the result of T1.
+      - CAP Theorem
+        - Consistent, Always Available, Network Partition Tolerant.
+        - How a DBMS handles failures determines whoch elements of the CAP theorem they support
+          - Traditional/Distributed Relational DBMS
+            - stop allowing updates until a majoruty of nodes are reconnected.
+          - NoSQL DBMSs
+            - provide mechanisms to resolve conflicts after nodes are reconnected.
+      - PACELC Theorem
+
+**OLTP --> EXTRACT, TRANSFORM, LOAD --> OLAP**
+### OLAP
+  
+  - Decision Support Systems
+    - Applications that serve the management, operations and planning levels of an organization to help people make decisions about future issues and problems by analyzing historical data
+  - Star schema vs Snowflake Schema
+    - Fat tables
+    - Issues
+      - Normalization
+        - Snowflake schemas take up less storage space.
+      - Query Complexity
+        - Snowflake schemas require more joins to get the data needed for a query
+        - Queries on star schemas will be faster
+          
+  - Push vs Pull
+    - Approach:
+      - Push query to data
+        - send the query to the node that contains the data.
+        - perfomr as mush filtering and processing as possible where data resides before transmitting over network.
+      - Pull data to query
+        - bring the data to the node that is executing a query that needs it for processing.
+  - The data that a node reveives from remote sources are cached in the buffer pool
+    - allows DBMS to support interndiate results that are large than the amount of memory availabel
+    - ephemeral pages are not persisted after a restart.
+  - What happens to a long-running OLAP query if a node crashes during execution??
+  - Query Fault Tolerance
+    - Most shared nothing distributed OLAP DBMSs are designed to assume that nodes do not fail during query execution
+      - if one node fails during query execution, then the whole query fails
+    - DBMS could take a snapshot of the intermediate results for a query during execution to allow it to recover of nodes fail.
+      - be strategic about this
+  - Query Planning
+    - All the optimizations fro mabove are still applicable
+      - Predicate pushdown
+      - Early projections
+      - Optimal Join Orderings
+    - Distibuted query optimizations is even harder because it must consider the physical location of data and network transfer costs.
+    - Query plan fragments
+      - Approach:
+        - Physical operators
+          - generate a single query plan and then break it up into partition specific fragments
+          - most systems implement this
+        - SQL
+          - rewrite the original query into partition-specific queries
+          - allows for local optimization at each node.
+          - *SingleStore* + *Vitess* use this.
+      - The efficiency of a distributed join depends on the target tables partitioning schemes
+      - One approach is to put entire tables on a single node and then perform the join
+        - You lose the parallelism of a dstributed DBMS
+        - Costly data transfer over the network.
+        - Does not scale.
+  - Distibuted Join Algorithms
+    - To join table R and S, the DBMS needs to get the proper tuples on the same node.
+    - Once the data is at the node, the DBMS then executes the same join algorithms that we discussed earlier in the semester.
+    - Hard to find optimal partition key
+    - Semi-Join
+      - Join type where the result only contains columns from the left tbale.
+      - Distributed DBMSs use semi-join to minimize the amount of data sent during joins
+        - This is like a projection pushdown.
+      - Some DBMSs support SEMI-JOIN OR fakes it as EXISTS  
+  - Cloud Systems
+    - DBaaS - manages DBMS environments
+    - Newer systems are starting to blur the lines between shared-nothing and shared-disk.
+      - You can do sinple filtering on Amazon S3 before copying data to compute nodes.
+    - Approach 
+      - Manages DBMS
+        - No significant modification to the DBMS to be aware that is running in a cloud environment.
+      - Cloud-Native DBMS 
+        - Explicitly designed to run ina cloud environment
+        - Shred-disk architecture.
+        - E.G: *Snowflake, Google BigQuery, Amazon Redshift, Ms SQL Azure*
+    - Serverless Dbs
+      - rather than always maintaining compute resources for each customer a serverless DBMS evicts tenants when they become idle.
+      - page in buffer pool and page table or restart.
+      - *Neon, Fauna, Planetscale, CockroachDB*
+    - Data Lakes
+      - Repository for stroing large amounts of structured, semi-structured and unstructured data without having to define a schema or ingest the data into proprietary internal formats
+      - *Trino, Redshift, Presto, Databricks, Hive, Snowflake*
+  - Universal Formats
+    - Most DBMSs use proprietary on-disk binary file format for their databases.
+    - The only way to share data between systems is to convert data into a common text-based format
+      - CSV, JSON, XML
+    - There are new open-source binary file fomrats that make it easier to access data across systems
+    - Examples:
+      - Apache Parquet
+        - compressed columnar storage from cloudera/twitter
+        - writeonce read many
+      - Apache ORC
+        - compressed columnar storage from Apache Hive
+      - Apache CarbonData
+        - compressed columnar storage with indexes from Huawei
+      - Apache Iceberg
+        - flexible data format that supports schema evolution from Netflix
+      - HDF5
+        - multi-dimensional arrays for scientific workloads
+      - Apache Arrow 
+        - in-memory compressed storage from Pandas/Dremio
+  - Disaggreagated Components
+    - System catalogs
+      - store metadata about the data.
+      - HCatalog, Google Data Catalog, Amazon Glue Data Catalog
+    - Node management
+      - K8S, Apache YARN
+    - Query Optimizers
+      - Apache Calcite, Greenplum Orca
+  
+## Embedded Database Logic
+  
+  - The application has a conversation with the DBMS to store/retrieve data.
+    - each DBMS has its own network protocol.
+    - client side APIs: JDBC, ODBC.
+  - Conversational Database API.
+  - Moving application logic into the DBMS can potentially provide sevaral benefits
+    - Fewer network round-trips
+    - immdiate notification of changes
+    - DBMS spends less time waiting during transactions
+    - Developers dont have to reimplement functionality
+  - User-defined functions
+    - A UDF is a functon written by the application developer that extends the system's functionality beyond its built-in operations
+      - it takes in input arguments(scalars)
+      - perform some computations
+      - return a result(scalars, tables)
+    - UDF Defn
+      - Return Types
+        - scalar functions: return single data value
+        - table functions: return a single result table.
+      - Computation definition
+        - sql functions
+        - external programming language
+      - a SQL-based UDF contains a list of queries that the DBMS executes in order when invoked
+        - the function returns the result of the last query executed.
+        - SQL standard provides the ATOMIC keyword to tell the DBMS to track dependencies UDFs.
+      - also use external programming language
+        - sandbox vs non-sandbox
+    - Advantages
+      - encourage modularity and code reuse
+        - different queries can reuse the same application logic without having to reimplement it each time.
+      - fewer network round-trips between application server and DBMS for complex operations
+      - some types of application logic are easier to express and read as UDFs than SQL.
+    - Disavantages
+      - Query optimzers treat UDFs as black boxes
+        - unable to estimate cost of you dont know that a UDF is going to do when run.
+      - It is difficult to parallelize UDFs due to correlated queries inside of them
+        - some DBMS will only execute queries with a single thread if they contain a UDF.
+        - some UDFs incrementally construct queries.
+      - complex UDFs in SLECT/WHERE clauses force the DBMS to execute iteratively
+        - RBAR = row by agonizing row
+        - things get worse if UDF invokes queries doe to implicit joins that the optimzer coannot see.
+      - since the DBMS executes the commands in the UDF one-by-one, its unable to perform cross-statement optimizations.
+  - Stored Procedures
+    - A stored procedure is a self-contained function that perfroms more complex logic inside of the DBMS
+      - cna have many input/output parameters
+      - can modify the database table/structures
+      - not normally used within a SQL query
+    - Some DBMS distinguish UDFs vs stored procedures, but not all.
+      - A UDF is meant to perform a subset of a read-only computations within a query.
+      - A stored procedure is meant to perform a complete computations that is independent of a query.
+  - Database Triggers
+    - A trigger instructs the DBMS to invoke a UDF when some event occurs in the database.
+    - The developer has to define
+      - What type of event will cause it to fire
+      - The scope of the event
+      - When it fires relative to that event.
+    - Event Type: INSERT, UPDATE, DELETE, TRUNCATE, CREATE, ALTER, DROP
+    - Event Scope: TABLE, DATABASE, VIEW, SYSTEM
+    - Timing: Before, After query, row
+  - Change Notifications
+    - A chnage notification is like a trigger except that the DBMS sends a message to an external entity that something notable has happened to the db.
+      - think pub/sub system
+      - can be chained with a trigger to pass along whenever a change occurs
       
+    - SQL STANDARD: LISTEN + NOFITY
+  - All DBMSs support the basic primitive types in the SQL standard, basic arithmetic and string manipulation on them.
+  - if we want to store data that doesnt match any of the built-in types?
+  - Complex Types
+    - Attribute splitting
+    - Application serialization
+  - User-defined Types
+    - is a special data type that is defined by the application developer that the DBMS can store natively
+      - introduced by Postgres in 1980
+      - added to SQL:1999 
+    - also referred to as structured user-defined types or structured types.
+    - each DBMS exposes apis to create UDT.
+  - Views
+    - Creates a virtual table containing the putput from a SELECT query. The view can then be accessed as if it was a real table.
+    - This allows programmers to simplify a complex query that is executed often
+      - wont make it run faster
+    - Often used a mechanism for hiding a subset of table's attributes from certain users.
+  - Select...into 
+    - creates static table that does no get updated when student gets updated.
+  - Materialized Views
+    - creates a view containing the output from a SELECT query that is reatined(not recomputed)
+      - some DBMSs automatically update matviews when the underlying tables chage
+      - other DBMSs(postgresql) require manual refresh.
+  - Disavantages:
+    - Not portable
+    - DBSs dont like change
+    - Potentially need tomaintain different versions.
+    
