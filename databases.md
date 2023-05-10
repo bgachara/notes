@@ -45,36 +45,124 @@ Ref:
       - Defines a database abstraction based on relations to avoid maintenance overhead.
       - A relation is an unordered set that contain the r/ship of attributes that represent entities.
       - A tuple is a set of attribute values(domain) in the relation.
+        - Values are normally atomic/scalar
+        - Special value NULL is a member of every domain.
       - A relations primary key uniquely indentifies a single tuple.
+        - sime DBMS automatically create an internal primary key if table does not define one.
       - A foreign key specifies that an attribute from one relation has to map to a tuple in another relation.
+        - create a secondary foreign key table relation handler.
       - Relational Algebra 
         - defines the high level steps of how to compute a query
         - fundamental operations to retrieve and manipulate tuples in a relation.
     - Key/Value
     - Graph
     - Document/ Object
+      - Embed data hierarchy into a single object.
     - Wide Column
     - Array/ Matrix/ Vector
 
 ## SQL
 
 - Current standard is SQL:2016
-- DML - Data Manipulation Language
-- DDL - Data Definition Language
-- DCL - Data Control Language
+- DML 
+  - Data Manipulation Language
+  - methods to store and retrieve information from a database.
+  - Approaches:
+    - Procedural
+      - query specifies the high-level strategy the DBMS should use to find the desired result.
+      - Relational Algebra
+    - Non-Procedure(Declarative)
+      - query specifies only what data is wanted and not how to find it.
+      - Relational Calculus.
+- DDL 
+  - Data Definition Language
+- DCL 
+  - Data Control Language
 - SQL is based on bags(duplicates) not sets(no duplicates)
 - Aggregates(AVG, MIN, MAX, SUM, COUNT, DISTINCT)
-- GROUP BY and HAVING - filter after aggregation
-- LIKE - string matching
-- string operations - CONCAT
-- DATE/ TIME OPS
+  - functions that return a single value from a bag of tuples.
+  - almost only used in the SELECT output list.
+  - can get multiple aggregates.
+  - use with DISTINCT.
+- GROUP BY and HAVING 
+  - Project tuples into subsets and calculate aggreagtes against each subset.
+  - filter after aggregation
+  - *examples for this*
+- LIKE 
+  - used for string matching.
+  - % - any substring
+  - _ - match any character.
+- String Operations 
+  - CONCAT()
+  - SUBSTRING()
+  - UPPER()
+- DATE/TIME OPS
 - Unix Epoch 01-01-1970
 - Output redirection
-- LIMIT, OFFSET
-- Nested Queries - difficult to optimize.
-- EXISTS
+  - store query results in another tables
+    - table must not already be defined.
+    - table will have the same # of columns with the same type as the input.
+- Output Control
+  - order the output tuples by the value in one or more of their columns.
+  - ORDER BY, DESC
+  - LIMIT 
+  - OFFSET
+- Nested Queries 
+  - Queries containing other queries
+  - difficult to optimize.
+  - appear almost anywhere in query
+  - IN, ALL, ANY, EXISTS
 - Window Functions
-- Common Table Expressions - auxiliary statements for use in larger query.
+  - performs a sliding calculation across a set of tuples that are related.
+  - like an aggregation but tuples are not grouped into a single output tuples.
+  - ROW_NUMBER(), RANK(), 
+  - OVER() - specifies how to group together tuples when computing the window function
+  - use PARTITION BY to specify group.
+  - include an ORDER BY in the window grouping to sort entries in each group.
+- Common Table Expressions 
+  - auxiliary statements for use in larger query.
+    - think of it like a temp table just for one query.
+    - alternate to nested queries and views.
+    - can bind output columns to names before the AS keyword.
+    - cte-recursion    
+
+### Relational Algebra
+
+  - Still defines the high-level steps of how to compute a query.
+  - A better approach is to state the high-level answer that you want the DBMS to compute.
+  - The relational model is independent of any query language implementations
+  - The DBMS is responsible for efficient evaluation of the query
+    - High-end systems have a sophisticated query optimzer that can rewrite queries and search for optimal execution strategies.
+  - Fundamental operations to retrieve and manipulate tuples in a relation
+    - Based on set algebra
+  - Each operaotr takes one or more relations as its inputs and outputs a new relation.
+    - we can chain operators together to create more complex operations.
+  - Operations
+    - Select 
+      - choose a subset of the tuples from a relation that satisfies a slection predicate.
+        - predicate acts as a filter to retain only tuples that fulfill its qualifying requirements.
+        - can combine multiple predicataes using conjuctions/disjunctions.
+    - Projection
+      - generate a relation with tuples that contains only the specified attrbutes
+        - can rearrange attributes ordering
+        - can manipulate the values
+    - Union 
+      - generate a relation that contains all tuples that appear in either only one or both input relations.
+    - Intersection
+      - generate a relation that contains only tuples that appear in both of the input relations.
+    - Difference
+      - generate a relation that contains only tuples that appear in the first and not the second of the input relations.
+    - Product
+      - generate a relation that contains all possible combinations of tuples from the input relations.
+    - Join
+      - generate a relation that contains all tuples that are a combination of two tuples(one form each relation) with a common value for one or more attributes.
+  - Extra operators
+    - Rename, Assignment, Duplicate Elimination, Aggregation, Sorting, Division
+
+### SQL
+  
+  - The minimum language syntax a system needs to say that it support SQL is SQL-92
+  - 
 
 ## MYSQL SERIES
 
@@ -93,6 +181,7 @@ Ref:
     - DECIMAL(exact), FLOAT(approximation)
     - decimal(10,4)
     - double is bigger than float, 8 to 4 bytes.
+    - exact types are implemented in the db.
   
   - Strings
     - CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, SET.
@@ -388,7 +477,29 @@ BIGINT     - 8  - -2^63
     - ST_DISTANCE_SPHERE function
     - bouding box of a point.
     
-    
+
+### ENGINES
+  
+  - Divided by core functionality
+    - Supported field and data types.
+    - Locking types.
+    - Indexing
+    - Transactions.
+  
+  - Include:
+    - MyISAM
+      - read heavy.
+      - lacks transactions capabilities.
+    - Merge
+    - Memory
+    - Federated
+    - Archive
+    - Csv
+    - Blackhole
+    - Berkeley DB
+    - InnoDB
+      - Full transaction functionality support
+      - Row level locking     
       
 
 
@@ -629,27 +740,82 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - The relational model does not specify that the DBMS must store all a tuple's attributes together in a single page.
 - This may not actually be the best layout for some workloads.
 
+## Storage Model
+
+- A DBMS storage model specifies how it physically organizes tuples on disk and in memory.
+  
 ### N-ary storage model (NSM)
 
 - been assuming n-ary storage model aka "row-storage"
-- ideal for OLTP.
+- ideal for OLTP workloads where txns tend to access individual entities and insert-heavy workloads.
+  - use the tuple-at-a-time iterator processing model.
+- stores all the attributes for a single tuple contiguously in a single page.
 - fast inserts, updates and deletes
 - good for queries that need entire tuples
 - not good for scanning large portions of the table and/or a subset of the attributes.
+- terrible mrmory locality in access patterns.
+- not ideal for compression because of multiple value domains within a single page.
+- NSM db page size are typically some constant multiple of 4KB h/w page.
+- A disk oriented NSM system stores a tuple's fixed-length and variable-length attributes contiguously in a single slotted page.
+- The tuple's record id(page#, slot#) is how the DBMS uniquely identifies a physical tuple.
+- header + slot array.
 
 ### Decomposition storage model (DSM)
 
 - stores the values of a single attribute for all tuples contiguously in a page, also known as a column store.
 - ideal for OLAP workloads where read-only queries perform large scans over a subset of the table's attrbutes.
+- store attributes and meta-data in separate arrays of fixed-length values.
+  - most systems identify unique physical tuples using offsets into these arrays
+  - need to handle variable-length values.
+    - padding varibale lenght fields to ensure they are fixed-length is wasteful, especially for large attributes.
+    - better approach is to use dictionary compression to convert repetitive variable-length data into fixed-lenght values(typically 32-bit integers)
+- maintain a separate file per attribute with a dedicated header area for metadata about entire column.
 - tuple identification
   - fixed-length offsets, each value is the same length for an attribute.
   - embedded tuple ids, value is stored with it tuple id in a column.
 - advantages: 
   - reduces amount wasted i/o because DBMS only reads data it needs.
-  - better query processing and data compression.
+  - better query processing and data compression because of increased locality and cached data reuse.
+  - better data compression.
 - disadvantages:
   - slow for point queries, inserts, updates and deletes because of tuple splitting/stitching.
   
+#### Observation
+  
+  - OLAP queries almost never access a single column in a table by itself
+    - at some point during query execution, the DBMS must get other columns and stitch the original tuple back together.
+  - We still need to store data in a columnar format to get the storage + execution benefits.
+  - We need columnar scheme that still stores attributes separately but keeps the data for each tuple physically close to each other.
+  
+### PAX storage model
+
+  - Partition Attributes Across(PAX) is a hybrid storage model that vertically partitions attributes within a database page
+    - Parquet and Orc
+  - The goal is to get the benefit of faster processing on columnar storage while retaining the spatial locality benefits of row storage.
+  - Horizontally partition row into groups. Then vertically partition their attributes into columns.
+  - Global header contains directory with the offsets to the file's row groups
+    - this is stored in the footer if the file is immutable
+  - Each row group contains its own meta-data header about its contents.
+
+- Transaparent Huge Pages(THP)
+  - instead of always allocating memory in 4KB pages, linux supports creating larger pages.
+  - reduced the # of TLB entries.
+
+### Hybrid storage model.
+
+- use separate execution engones that are optimized for either NSM or DSM databases.
+  - store new data in NSM for fast OLTP.
+  - Migrate data to DSM for more efficient OLAP.
+  - Combine query results from both engines to appear as a single logical database to the application
+  - Approaches
+    - Fractured Mirrors
+      - store a second copy of the db in a DSM layout that is automatically updated.
+      - Oracle, SQL Server.
+    - Delta Store
+      - stage updates to the database in an NSM table.
+      - A background thread migrates ipdates from delta store and applies them to DSM data.
+      - Vertica, SingleStore, Databricks, Napa.
+
 - I/O is the main bottleneck if the DBMS fetches data from disk during query execution.
 - DBMS can compress pages to increase the utility of the data moved per I/O operation.
 - Key trade-off is speed vs compression ratio.
@@ -659,8 +825,98 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Data sets tend to have highly skewed distributions for attribute values.
 - Data sets tend to have high correlation between attributes of the same tuple.
 
+## OLAP INDEXES
 
+- OLTP DBMS use indexes to find individual tuples without performing sequential scans
+  - tree-based indexes are meant for queries with low selectivity predicates
+  - also need to accomodate incremental updates
+- OLAP don't necessarily need to find individual tuples and data files are read-only.
+- How to increase sequential scans performance
+  - Data prefetching
+  - Task parallelization/Multi-threading
+  - Clustering / Sorting.
+  - Late Materialization
+  - Materialized Views / Result Caching
+  - Data Skipping
+    - Approaches:
+      - Approximate Queries(Lossy)
+        - Execute queries on a sampled subset of the entire table to produce approximate results
+        - Examples: BlinkDB, Redshift, Snowflake, BigQuery, DataBricks.
+      - Data Pruning(Loseless)
+        - use auxiliary data structure for evaluating predicates to quickly identify portions of a tbale that the DBMS can skip instead of examining tuples individually
+        - DBMS must consider tradeoffs between scope(size) vs filter efficacy, manual vs automatic
+        - Considerations
+          - Predicate Selectivity
+            - How many tuples will satisfy a query's predicates
+          - Skewness
+            - Whether an attribute has all unique values or contain repeated values
+          - Clustering/Sorting
+            - Whether the table is pre-sorted on the attributes accessed in a query's predicates.
+        - Zone Maps
+          - ref paper:`small materialized aggregates: a lightweight index structure for data warehousing`
+          - pre-computed aggregates for the attribute values in a block of tuples.
+          - DBMS checks the zone map first to decide whether it wants to access the block.
+            - originally called small materialized aggregates.
+            - DBMS automatically creates/maintains this meta-data.
+          - Zone Maps are only useful when the target attribute's position and values are correlated.
+            - if scope is too large, then the zone maps will be useless.
+            - if scope is too small, DBMS will spend too much time checking zone maps.
+        - BitMap Indexes
+          - ref paper:`model 204 architecture and performance`
+          - store a separate Bitmap for each unique value for an attribute where an offset in the vector corresponds to a tuple.
+            - the i-th position in the Bitmap corresponds to the i-th tuple in the table.
+          - typically segmented into chucks to avoid allocating large blocks of contiguous memory
+            - one row per group in PAX.
+          - Design decisions
+            - Encoding scheme
+              - How to represent and organize data in a Bitmap.
+              - Approaches
+                - Equality encoding
+                  - basic scheme with one bitmap per unique value.
+                - Range encoding
+                  - use one bitmap per interval instead of one per value.
+                - Hierarchial encoding
+                  - ref paper:`Hierarchical bitmap index:an efficient and scalable indexing technique for set-valued attributes`
+                  - use a tree to identify empty key ranges.
+                  - high cost overhead.
+                - Bit-sliced encoding
+                  - use a bitmap per bit location across all values
+                  - Bit-slices can also be used for efficient aggregate computations.
+                  - can use Hamming Weight.
+                - Bitweaving
+                    - ref paper:`bitweaving: fast scans for main memory data processing`
+                    - Alternative storage layout for columnar databases that is designed for efficient predicate evaluation on compressed data using SIMD.
+                      - Order-preserving dictionary encoding
+                      - Bit-level parallelization
+                      - Only require common instructions(no scatter/gather)
+                    - alternate to Bit-Slicing.
+                    - Approaches:
+                      - Horizontal
+                        - Row-oriented storage at the bit-level.
+                      - Vertical 
+                        - Column-oriented storage at the bit-level.
+          - Column Imprints
+            - ref paper:`column imprints: a secondary index structure.`
+            - Store a bitmap that indicated whether there is a bit set at a bit-slice of cache-line values.
+          - Column Sketches
+            - ref paper:`column sketches: a scan accelration for rapid and robust predicate evaluation`
+            - a variation of range-encoded bitmaps that uses a smaller sketch cdes to indicate that a tuple's value exists in a range.
+            - DBMS must automatically figure out the best mapping of codes.
+              - trade-off between distribution of values and compactness.
+              - assign unique codes to frequent values to avoid false positives.
+                    
+            - Compression
+              - How to reduce the size of sparse Bitmaps
+  - Data Parallelization / Vectorization
+  - Code Specialization / Compilation
+  
 ## Database Compression
+
+- Reduce the size of the database physical representation to increase the # of values accessed and processed per unit of computation or I/O.
+
+- Data sets tend to have highly skewed distributions for attrbute values.
+- Data sets tend to have high correlation between attributes of the same tuple.
+- Key trade-off is speed vs compression ratio.
 
 - Goal 1: Must produce fixed-length values, only exception is var-length stored in separate pool.
 - Goal 2: Postpone decompression for as long as possible during query execution, late materialization
@@ -673,9 +929,10 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - Block-level
   - compress a block of tuples for the same table
   - naive compression 
-    - LZO, LZ4, Snappy, Zstd.
+    - LZO, LZ4, Snappy, Zstd*.
     - Computational overhead
     - compress vs decompress speed.
+    - schemes do not consider the high-level meaning or semantics of the data.
   
 - Tuple-level
   - compress the contents of the entire tuple(NSM only)
@@ -703,6 +960,7 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - type of delta encoding that avoids duplicating common prefixes/suffixes between consecutive tuples.
     - works best with sorted data.
   - Dictionary encoding
+    - ref paper:`integrating compression and execution in column-oriented database systems`
     - build a data structure that maps variable-length values to a smaller integer identifier.
     - replace those values with their corresponding identifier in the dictionary data structure.
       - need to support fast encoding and decoding
@@ -1136,8 +1394,19 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - Hash join when tables dont fit in memory.
 
 *Integrate a profile for project*
-## Query Execution
+## Query Execution and Processing Models
+
+- DBMS engineering is an orchestration of a bunch of optimizations that seek to make full use of hardware.
+- There is not a single technique that is more important than others.
  
+  - Optimization goals
+    - Reduce Instruction Count
+      - use fewer instructions to do the same amount of work.
+    - Reduce cycles per instruction
+      - execute more CPU instructions in fewer cycles.
+    - Paralleliza execution
+      - use multiple threads to compute each query in parallel.
+      
   - Processing Models
     - defines how the system executes a query plan
     - different trade-offs for different workloads
@@ -1152,12 +1421,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - Each operator processes its input all at once and then emits its output all at once.
         - Better for OLTP workloads because queries only access a small number of tuples at a time. 
         - Not good for OLAP with large intermediate results.
+        - The output can be either whole tuples (NSM) or subsets of columns(DSM).
       - Vectorized / Batch Model
         - each operator emits a batch of tuples instead of a single tuple
         - ideal for OLAP / data warehouses because it greatly reduces the number of invocations per operator.
         - allows for opearators to more easily use SIMD to process batches of tuples.
   
   - Plan Processing Direction
+    - ref paper:`push vs pull-based loop fusion in query engines`
     - Top-to-Bottom
       - start with the root and pull data up from its children
       - tuples are always passed with function calls.
@@ -1251,11 +1522,14 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
         - do not have to manage shread memory.
         - thread per worker does not mean that DBMS supports intra-query parallelism
     - Inter vs Intra Query Parallelism
-      - Inter: Execute multiple disparate queries simultaneously
+      - Inter: 
+        - Execute multiple disparate queries simultaneously
         - increases throughput and reduces latency
         - if read-ony then this requires almost no explicit co-ord between queries.
         - hard if updating tables.
-      - Intra: Execute the operations of a single query in parallel
+        - OLAP queries have parallelizable and non-parallelizable phases, goal is to keep all cores active.
+      - Intra: 
+        - Execute the operations of a single query in parallel
         - improve the performance of a single query by executing its operators in parallel.
         - there are parallel versions of every operator.
         - decreases latency for long-running queries esp for OLAP queries.
@@ -1294,7 +1568,15 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
 - No optimizer truly produces the "optimal" plan.
   - Use estimation techniques to guess real plan cost
   - Use heuristics to limit the search space.
+- A query plan is a DAG of operators
+- An operator instance is an invocation of an operaotr on a unique segment of data.
+- A task is a sequence of one or more operator instances (pipelines).
 
+- Monetdb/*100
+  - ref paper:`monetdb/*100: hyper-pipelining query execution`
+  - low-level analysis of execution bottlenecks for in-memory DBMSs on OLAP workloads
+    - show how DBMS are designed incorrectly for modern CPU architectures.
+    
 - **This is the hardest part of any database**
 
 - Logical plans vs Physical plans

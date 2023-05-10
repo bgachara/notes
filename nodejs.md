@@ -5,6 +5,9 @@ Ref:
 `nodejs.dev`
 
 
+- You cannot find ready-made solutions for every occasion, but if you understand inner mechanismsof a complex system,
+  you will be able to analyze and critically evaluate other people's experience and come at your own conclusions.
+  
 ## Introduction
 
 - Concepts covered here:
@@ -48,4 +51,4 @@ Ref:
   - Setting to production:
     - logging kept at a minimum, essential level
     - more caching levels take place to optimise performance as opposed to recompilation.
-    - 
+  

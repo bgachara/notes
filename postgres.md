@@ -42,6 +42,37 @@ create role le login password 'king' superuser;
     - maintenance_Work_mem
 - Creating group roles and add members to it.
 
+## Tablespaces
+
+ - determine physical data layout.
+ - virtually a directory in a file system
+ - can distribute data across tablespaces per access i.e archive or active data.
+ - can be used by more than one database and DB can store across TSs.
+ - each db has a default tablespace.
+
+## Files and Forks
+
+ - All information related with a relation is stored in several different forks, each containing data of a particular type.
+ - (oid) numeric filename id of a fork file.
+
+## Pages
+
+ - all files are logically split into pages which represent the minimum amount of data that can be read or written.
+ - usually 8KB.
+ - only configurable on build time...upto 32KB.
+
+## TOAST
+ 
+ - The Oversized Attributes Storage Technique.
+ - fit long rows into pages.
+ - plain, extended, external, main.
+
+## Processes and Memory
+
+ - Postmaster...spawner of processes.
+ - startup, autovacuum, checkpointer, wal writer, writer, wal sender, wal receiver, stats collector
+ - clients and connection management...postmaster.
+
 ## Database Creation
 
 - Postgres uses a client/server model.
