@@ -1503,15 +1503,129 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
       - DBMS manages its own scheduling
       - may or not use a dispatcher thread.
       - thread crash may kill the entire system.
-      - Scheduling
+      - Query Scheduling
         - How many tasks should it use?
         - How many CPU cores should it use.
         - What CPU core should the tasks eecute on
         - Where should a task store its output
       - DBMS always knows more than the OS.
+      - Scheduling Goals
+         - Throughput
+          - maximise the number of completed queries.
+         - Fairness
+          - Ensure that no query is starved for resources.
+         - Query Responsiveness
+          - Minimize tail latencies(especially for short queries)
+         - Low Overhead
+          - Workers should spend most of their time executing not figuring out what task to run next.
+      - Worker Allocation
+        - Approach: 
+          - One worker per core
+            - each core is assigned one thread that is pinned to that core in the OS.
+            - sched_setaffinity
+          - Multiple workers per core
+            - Use a pool of workers per core or per socket.
+            - Allows CPU cores to be fully utilized in case one worker at a core blocks.
+      - Task Assignment
+        - Approach:
+          - Push
+            - A centralized dispatcher assigns taks to workers and monitors their progress.
+            - When the worker notifies the dispatcher that it is finished, it is given a new task.
+          - Pull
+            - Workers pull the next task form a queue, process it and then return to get the next task.
+      - The DBMS scheduler must be aware of its hardware memory layout
+        - Uniform vs Non-Uniform Memory Access.
+      - Data Placement
+        - DBMS can partition memory for a database and assign each partition to a CPU.
+        - By controlling and tracking the location of partitions, it can schedule operators to execute on workers at the closest CPU core.
+        - Linux move_pages and numactl
+      - Memory Allocation
+        - What happens when the DBMS calls malloc?
+          - Assume that the allocator doesnt already have a chunk of memory that is an give out.
+          - Almost nothing!
+            - The allocator will extend the process data segment
+            - But this new virtual memory is not immediately backed by physical memory
+            - OS allocates physical memory when there is a page fault on access.
+          - After a page fault, where does theOS allocate physical memory in a NUMA system.
+        - Memory Allocation Location
+          - Approach:
+            - Interleaving
+              - Distribute allocated memory uniformly across CPUs
+            - First Touch
+              - at the CPU of the thread that access the memory location that caused the page fault.
+          - OS can try to move memory to another NUMA region from observed access patterns.
+      - Partitionin vs Placement
+        - A partitioning scheme is used to split the database based on some policy
+          - Round-robin
+          - Attribute Ranges
+          - Hashing
+          - Partial/Full Replication
+        - A placement scheme then tell the DBMS where to put those partitions
+          - Round-robin
+          - Interleave across cores
+      - How do we decide how to create a set of tasks from a logical query plan?
+        - Static scheduling
+          - DBMS decided how many threads to use to execute the query when it generates the plan.
+          - It does not change while the query executes
+            - Easiest approach is to just use the same # of tasks as the # of cores.
+            - Can still assing tasks to threads based on data location to maximize local data processing.
+        - Morsel-driven scheduling
+          - ref paper: `morsel-driven parallelism: numa-aware query evaluation framewrok for the many-core age`
+          - Dynamic scheduling of tasks that operate over horizontal partitions called morsels distributed across cores
+            - One worker per core.
+            - One morseld per task.
+            - Pull-based task assignment.
+            - Round-robin data placement
+          - Supports parallel, NUMA-aware operator implementations.
+          - Because there is only one worker per core and oe morsel per task, HyPer must use work stealing because otherwise threads could sit idle waiting for stragglers
+          - DBMS uses a lock-free has table to maintain the global work queues.
+          - Tasks can have different execution costs per tuple
+            - Simple selection vs string matching
+          - HyPer has no notion of execution priorities...
+            - Short-running queries get blocked behind long-running queries
+            - All query tasks are executed with same priority
+          - Umbra - Morsel scheduling 2.0
+            - ref paper:`self-tuning query scheduling for analytical workloads`
+            - taks are not created statically at runtime.
+            - each task may contain multiple morsels.
+            - implementation of stride scheduling
+              - each worker maintains its own thread-local meta-data about the available tasks to execute.
+                - active slots - which entries in the global slot arrat have active task sets available.
+                - change mask - indicates when a new task set is added to the global slot array.
+                - return mask - indicates when a worker completes a task set.
+              - workers perform CaS updates to TLS meta-data to broadcasr changes
+            - priority decay - query arrival times.
+        - SAP HANA - NUMA-AWARE SCHEDULER
+          - ref paper: `scaling up concurrent main-memory column store scans:towards adaptive numa-aware data and task placement`
+          - pull-based scheduling with multiple worker threads that are organized into groups
+            - each CPU can have multiple groups
+            - each group has a soft and hard priority queue
+          - uses a separate "watchdog" thread to check whether groups are saturated and can reassingn tasks dynamically.
+          - DBMS maintains soft and hard priority task queues for each thread group.
+            - threads can steal tasks from other groups soft queue
+          - Four different pools of thread per group
+            - Working: actively executing a task.
+            - Inactive: blocked inside of the kernel due to a latch
+            - Free: Sleeps for a little, wake up to see whether there is a new task to execute.
+            - Parked: Waiting for a task(free thread) but blocked in the kernel until the watchdog thread wakes it up.
+          - Dynamically adjust thread pinning based on whether a task is CPU or memory bound.
       - *SQLOS* 
         - user-level OS layer that runs inside the DBMS and manages provisioned hardware resources.
+          - determines which taks are schedules onto which threads.
+          - Also manages I/O scheduling and higher-level concepts like logical database locks.
+          - ref: `Ms sql server 2012 interals`
         - Non-preemptive thread scheduling through instrumented DBMS code.
+      - If requests arrive at the DBMS faster than it can execute them, then the system becomes overloaded.
+        - The OS cannot help us here bacause it does not know what threads are doing
+          - CPU bound: do nothing
+          - memory bound:oom
+        - Easiest DBMS solution: Crash
+        - Approach:
+          - Admission control
+            - abort new requests whwn the system believes that it will not have enough resources to execute that request.
+          - Throttling
+            - delay responses ro clients to increase amount of time between requests
+            - assumes a synchronous submission scheme.
     - Embedded worker
       - runs inside the same address space as the application
       - application is responsible for threads and scheduling
@@ -1560,7 +1674,118 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
   - Scheduling
   - Concurrency Issues
   - Resource Contention.
+
+## Vectorised Query Execution
   
+  - The process of converting an algorithm's scalar implementation that processes a single pair of operands at a time, to a vector implementation that processes one 
+    operation on multiple pairs of operands at once.
+  - Why this matters
+    - say we can parallelize our algorithms over 32 cores, assume each core has a 4-wide SIMD registers, speed-up 32x * 4x = 128x.
+  - Single Instruction, Multiple Data
+    - a class of CPU instructions that allow the processor to perform the same operation on multiple data points simultaneously.
+    - all major ISAs have microarchitecture support SIMD operations
+      - x86: mmx, sse, sse2, sse3, sse4, avx, avx2, avx512
+      - PowerPC: Altivec
+      - ARM: Neon, SVE
+      - RISC-V: RVV.
+  - Approaches
+    - Horizontal
+      - Perform operation on all elements together within a single vector.
+    - Verical
+      - Perform operation in an elementwise manner on elements of each vector.
+  - SIMD Instructions
+    - Data movement
+      - move data in and out of vector registers
+    - Arithmetic Operations
+      - apply operation on multiple data items.
+      - ADD, MUL, SUB, DIV, MAX, MIN.
+    - Logical Instructions
+      - logical operations on multiple data items.
+      - AND, OR, XOR, ANDN, ANDPS, ANDNPS.
+    - Comparison Instructions
+      - Compare multiple data items
+    - Shuffle Instructions
+      - move data between SIMD registers
+    - Miscellaneous
+      - Conversion: Transform data between x86 and SIMD registers.
+      - Cache Control: move data directly from SIMD registers to memory(bypass CPU cache)
+    - ref video:`james reinders`
+  - SIMD Trade-offs
+    - Advantages
+      - Significant performance gains and resource utilization if an algorithm can be vectorized.
+    - Disadvantage
+      - Implement an algorithm using SIMD is still mostly a manual process.
+      - SIMD may have restrictions on data alignment
+      - Gathering data into SIMD registers and scattering it to the correct locations is tricky and/or inefficient.(no longer true in avx-512f)
+      - *read more on avx-512*
+  - SIMD Implementations
+    - Automatic Vectorization
+      - compiler can identify when instructions inside of a loop can be rewritten as a vectorized operations.
+      - works for simple loops only and is rare in database operators. Require h/w support for SIMD instructions.
+    - Compiler Hints
+      - provide the compiler with additional information about the code to let it know that its safe to vectorize.
+      - Approaches:
+        - Give explicit information about memory locations
+        - Tell the compiler to ignore vector dependencies.
+        - *check languages support for such directives*
+    - Explicit Vectorization
+      - Use CPU intrinsics to manually marshal data between SIMD registers and execute vectorized instructions
+        - not portable across CPUs(ISAs / versions)
+      - There are libraries that hide the underlying calls to SIMD intrinsics.
+        - Google Highway
+        - simd
+        - Expressive Vector Engine
+        - std::simd
+  - There are fundamental SIMD operations that the DBMS will use to build more complex functionality
+    - Masking
+      - Almost all avx-512 operations support predication variants whereby the CPU only performs operations on lanes specified by an input bitmask.
+    - Permute
+      - for each lane, copy values in the input vector specified by the offset in the index vector into the destination vector.
+      - prior to avx-512, DBMS had to write data from the SIMD register to memory then back to the SIMD register.
+    - Selective Load/Store
+    - Compress/Expand
+    - Selective Gather/Scatter
+    - ref paper:`make the most out of your smid investments: counter control flow divergence in compiled query pipelines`
+  - Vectorized DBMS algorithms
+    - ref paper:`rethinking simd vectorization for in-memory databases`
+    - principles for efficient vectorization by using fundamental vector operations to construct more advanced functionality.
+      - favor vertical vectorization by processing different input data per lane.
+      - maximize lane utilization by executing unique data items per lane subset(no useless computations)
+    - vectorized operators
+      - Selection Scans
+        - branchless.
+        - key - mask - offset.
+        - bitmasks replace if-clauses.
+        - relaxed operator fusion
+          - ref paper:`relaxed operator fusion for in-memory databases: making compilation, vectorization and prefetching work together at last`
+          - vectorized processing model designed for query compilation execution engines.
+          - decompose pipelines into stages that operate on vectors of tuples
+            - each stage may contain multiple operators
+            - communicate through cache-resident buffers
+            - stages are granularity of vectorization + fusion.
+          - dbms can tell the CPU to grab the next vector while it works on the current batch.
+            - prefetch enabled operators define start of new stage
+            - hides the cache miss latency
+          - any prefetching technique is suitable
+            - group prefetching, s/w pipelining, AMAC.
+            - Group prefetching works and is simple to implement.
+      - Hash Tables
+        - expand linear probing hash table
+        - converge on cache size degradation
+      - Partitioning / Histograms.
+        - use scatter and gathers to increment counts
+        - replicate the histogram to handle collisions.
+  - Caveat Emptor
+    - AVX-512 is not always faster than AVX2
+    - Some CPUs downgrade their clockspeed when switching to AVX-512 mode
+      - compilers will prefer 256-bit SIMD operations
+    - If only a small portion of the process uses AVX-512, then it is not worth the downclock penalty.
+  - Vecrozation is essential for OLAP queries
+  - We can combine all the intra-query parallelism optimizations we've talked about in a DBMS
+    - Multiple threads processinf the same query.
+    - Each thread can execute a compiled plan
+    - The compiled plan can invoke vectorized operations.
+    
 ## Query Planning and Optimization
 
 - For a given query find the correct execution plan that has the lowest "cost".
@@ -1701,6 +1926,96 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
           - treat physical properties of data as first class entities during planning.
         - **Watch the MSSQL query optimizer talk**
         
+## Query Compilation and Code Generation
+
+- Optimization goals:
+  - Reduce Instruction count
+    - focus of this segment
+    - use fewer instructions to do the same amount of work.
+  - Reduce Cycles per Instruction
+  - Parallelize Execution
+- Ref paper:`Compilation in the microsoft sql server hekaton engine`
+  - after minimizing disk i/o during query execution, only way to increase throughput is to reduce the number of instructions executed.
+    - to go 10x faster. DBMS must execute 90% fewer instructions.
+    - to go 100x faster, DBMS must execute 99% fewer instructions.*very hard*.
+- Obs:
+  - One way to achieve such a reduction in instructions is through code specialization
+  - This means generating code that is specific to a task in the DBMS.
+  - Most code is written to make it easy for humans to understand rather than performance.
+- Code specialization
+  - The DBMS generates code for any CPU-intensive task that has a similar execution pattern on different inputs
+    - Access Methods
+    - Stored Procedures
+    - Query Operator execution
+    - Predicate Evaluation *most common
+    - Logging Operations
+  - Approaches:
+    - Transpilation
+      - Write code that converts a relational query plan into imperative language source code and then run it through a conventional compiler to generate native code.
+    - JIT Compilation
+      - generate an IR of the query that the DBMS then compiles into native code.
+- Hique - code generation
+  - ref paper:`generating code for holistic query evaluation`
+  - For a given query plan, create a c/cpp program that implements that query's execution
+    - bake in all the predicates and type conversions
+  - Use an off-self compiler to convert the code into a shared object, link it to the DBMS process and then invoke the exec function.
+  - The generates query code can invoke any other function in the DBMS. This allows it to use all the same components as interpreted queries
+    - Network Handlers
+    - Buffer Pool Manager
+    - Concurrency control
+    - Logging / Checkpoints
+    - Indexes
+  - Debugging is relatively easy because you step through the generated source code.
+  - Watch Query Compilation cost
+  - Hique does not support full pipelining.
+- Relational operators are a useful way to reason about a query but are not the most efficient way to execute it.
+- It takes a relatively long time to compile a c/cpp source file into executable code.
+- Hyper - JIT Query Compilation
+  - ref paper:`efficiently compiling efficient query plans for modern h/w`
+  - Compile queries in-memory into native code using LLVM toolkit
+    - emits LLVM IR.
+  - Aggressive operator function within pipelines to keep a tuple in CPU registers for as long as possible.
+    - push-based vs pull-based.
+    - data centric vs operator centric.
+  - Query compilation time grows super-linearly relative to the query size.
+    - no of joins
+    - no of predicates
+    - no of aggregates
+  - not a big issue with OLTP as opposed to OLAP workloads.
+- Hyper - adaptive execution
+  - ref paper:`adaptive execution of compiled queries`
+  - generate LLVMIR for the query and immediately start executingthe IR using an interpreter.
+  - Then the DBMS compiles the query in the background.
+  - When the compiled query is ready, seamlessly replace the interpretive execution
+    - for each morsel, check to see whether the compiled version is available.
+- Real-world implementations
+  - Custom
+    - System R.
+    - Actian Vector
+      - ref paper:`micro adaptivity in vectorwise`
+    - Amazon Redshift
+      - ref paper:`amazon redshift re-invented`
+    - Oracle
+    - Ms Hekaton
+      - ref paper:`compilation in the microsoft sql server hekaton engine`
+    - SQLite
+      - converts a query plan into opcodes, then executes them in a custom VM.(bytecode engine)
+      - Virtual Database Engine(VDBE)
+      - VM ensures queries execute the same in any possible environment.
+    - TUM Umbra
+      - ref paper:`tidy tuples and flying start: fast compilation and fast execution of relational queries in umbra`*
+  - JVM-BASED
+    - Apache Spark
+      - ref paper:`spark sql: relational data processing in spark`
+    - Neo4j
+    - Presto/Trino
+  - LLVM
+    - Single store
+      - MemSQL programming language(MPL)
+    - VitesseDB
+    - PostgesSQL 2018
+    
+    
 ## Concurrency Control Theory
 
   - A DBMS's concurrency control and recovery components permeate throughout the desing of its entire architecture.    

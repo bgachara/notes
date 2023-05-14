@@ -29,7 +29,9 @@ Ref:
   - V8
   - WASI
   
-- What is NodeJS?  
+
+### What is NodeJS?  
+  
   - Built in Cpp
   - A nodejs app runs in a single process, without creating a new thread for every request.
   - Provides a set of asynchronous i/o primitives in its standard library that prevent Js code from blocking.
@@ -51,4 +53,34 @@ Ref:
   - Setting to production:
     - logging kept at a minimum, essential level
     - more caching levels take place to optimise performance as opposed to recompilation.
+
+### EventEmitter
+
+  - is a module that facilitates communication/interaction between objects in Node.
+  - core of Node asynchronous event-driven architecture, many of node's built-in inherit from EventEmitter including Express.js
+  - Emitter objects emit named events that cause previously registered listeners to be called.
+  - So an emitter object basically has two main features
+    - Emitting name events.
+    - Registering and unregistering listener functions.
+  - MyEmitter.on('eventname', c1)
+  - MyEmitter.emit('eventname')
   
+### Buffers
+
+  - understand binary, decimals, hexadecimals.
+  - container that takes in data of some fixed lenght then sends it out.
+  - way to deal with raw binary data.
+  - always fixed size.
+  - great understanding of encodings.
+
+### File System
+
+  - sequence of bits and depending on encoding could represent different things.
+  - file data - metadata of a file.
+  - Three ways to create a file
+    - Promises API.
+    - Callback API.
+    - Synchronous API - blocks main thread.
+  - Async generator / iterator.
+  - Open - save a file descriptor. 
+  - Watch functionality.    
