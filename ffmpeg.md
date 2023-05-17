@@ -1,0 +1,73 @@
+# FFMPEG
+
+
+## Introduction
+
+  - Acronym for Fast Forward Motion Picture Expert Group.
+  - platform or structure for developing software applications.
+  - able to process anything in terms of audio, video, data and pictures.
+  - Encode - process of compressing a file so as to enable the faster transmission of the file.
+  - Decode - function that translates encoded data into its original format.
+  - Codec
+    - enCOder, DECoder.
+    - video codecs - MPEG, H.264, AV1
+    - audio codecs - Mp3, AAC, Opus, ogg, vorbis, flac, alac
+  - Bitrate 
+    - data rate, is the amount of data per second in the encoded video file, usually expressed in kilobits per secod(kps) or megabits per second(mbps)
+    - mp3 - maximum bitrate of 320 kilobit per second.
+    - standard CD - 1.411 kilobit per second
+    - h264 video in FullHd has a bitrate in the range of 3.000 - 6.000kbps, while 4k can reach 51.000 kbps
+    - non-compressed i.e Apple ProRes format in 4k can reach 253,900kbps.
+  - Container
+    - like a box contains important objects, containers exist to allow multiple data streams such as video, audio, subtitles and other data, to be embedded into a single file.
+    - e.g mp4, mkv, webm, mov, mxf, asf, MPEG transfrom stream(.ts), Core Audio Format(.caf), webp
+  - Mux
+    - process of taking encoded data in the form of packets and write it into files in a specific container format
+  - Demux
+    - process of reading media files and split it into chunks of data.
+  - Transmuxing
+    - repackaging, packetizing
+    - process in which audio and video files are repackaged into different delivery formats without changing original file content.
+  - Transcoding
+    - process of converting a media file or object from one format to another.
+  - Resolution
+    - defines the number of pixels that make up the picture on your screen.
+    - TV resolution is defined as number of pixels contained vertically in the picture.
+    - SD -480, HD - 720,1080, UHD - 2160, 4320 - 8K UHD.
+  - Aspect Ratio
+    - is the ratio of width to height of the TV screen.
+    - certain spect ratios are designed to handle certain resolutions without stretching or distortion of picture without blank space around the picture.
+    - 4:3, 16:9
+  - Interlaced format
+    - display a full picture by dividing it into 2 different set of lines: the even and the odd lines.
+    - each are displayed on the screen every 1/60th of a second, both of which constitute a video frame.
+    - earliest video compression method.
+  - Progressive
+    - displays both even and odd lines at the same time, entire video frame at the same time.
+  - Letter box
+    - is the practice of transferring film shot in a widescreen aspect ratio to standard width video formats while preserving the content original aspect ratio.
+    - LBX, LTBX
+  - VOD/SVOD
+    - video on demand
+    - Subscription video on demand
+  - Streaming
+    - process of delivering media through small chunks of compressed data and sent to a requesting device.
+  - HLS
+    - HTTP Live Streaming Protocol.
+    - created by Apple for delivering video destined for Apple devices.
+  - DASH
+    - Dynamic Adaptive Streaming over Http
+    - Open source HLS
+  - M3U8
+    - standard text file encoded utf-8 format and organized as a playlist of items  with their location, to be reproduced in a particular sequence.
+  - AV1
+    - AOMedia - Alliance for Open Media Video 1
+    - Ms, Amazon, Apple, Mozilla, Netflix, Google,Intel
+  - HDR
+    - High Dynamic Range
+    - Recreate image realism from camera through post-production to display and distribution.
+  - h264
+    - standard for video compression defined by MPEG AND ITU.
+    - h264/AVC
+  
+    

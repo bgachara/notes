@@ -3,6 +3,7 @@
 `Notes from Modern operating systems by Tanenbaum`
 `Windows Fundamentals Notes from Reversing - Secrets of Reverse Engineering`
 `CS162 Youtube - John Kubiatowicz`
+`Operating Systems: Three Easy Pieces`
 
 *the concepts and design patterns appear at many levels*
 *the better you understand their design and implementation, the better use you'll make of them*

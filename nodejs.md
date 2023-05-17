@@ -68,10 +68,11 @@ Ref:
 ### Buffers
 
   - understand binary, decimals, hexadecimals.
-  - container that takes in data of some fixed lenght then sends it out.
+  - container that takes in data of some fixed length then sends it out.
   - way to deal with raw binary data.
   - always fixed size.
   - great understanding of encodings.
+  - Each character in Hex is 4bits.
 
 ### File System
 
@@ -84,3 +85,59 @@ Ref:
   - Async generator / iterator.
   - Open - save a file descriptor. 
   - Watch functionality.    
+
+### Streams
+  
+  - Defn: An abstract interface for working with streaming data in Node.js.
+  - Data streaming.
+  - Writable streams
+  - Readable streams
+  - Duplex / Transform Streams
+  - create file -> create writestream -> create buffer -> point stream to buffer.
+  - 16KB chunks.
+  - Internal buffer - 16384 bytes, (stream.writableHighWaterMark), (stream.writableLength) - get filled space in buffer.
+  - Has events, properties and methods to it.
+  - reduce number of writes as waiting for buffer to fill before writing out.
+  - Drain before writing more.
+  - Read and Write streams have one internal buffer.
+  - writableLength should never be larger than writableHighWaterMark as this will lead to extreme buffering.
+  - Watch and compare memory impact of different implementations.  
+  - Duplex Stream - Has Readable Internal buffer, Writable Internal buffer.
+  - Transform Stream --> read from Readable buffer process data then write to Writable buffer.
+
+### Networking
+  
+  - Networking card come with unique MAC address. hex number.
+  - packet - data container. sent via switch to other computer.
+  - source and destination fields on the packet.
+  - Routers - work with IP addresses(unique to each device on network).
+  - Internet Service Provider (ISP)
+  - 127.0.0.1 - loop back address / localhost.
+  - Ports on addresses have to be configured to do sth.
+  - Network Layers
+    - Physical layer --> Cable, Bits, Signal, Binary Transmission.
+    - Data Link layer --> Cable, Frames, MAC Addresses
+    - Network layer --> IP Addresses, Packets, Path Determination
+    - Transport layer --> Segments, End-to-End connections, UDP/TCP
+    - Application layer --> Data
+  - OSI Model
+    - 
+  - current cables can move upto 1GB per second.
+  - net module base of all networking on node.
+  - TCP
+    - data is received as exactly it was sent.
+    - three way handshake
+    - Headers
+      - source port.
+      - destination port(16 bits)
+      - sequence number(32 bits)
+      - ack numbers(32 bits)
+      - Other headers
+      -
+  - UDP
+      - Headers
+        - source port(16 bits)
+        - destination port(16 bits)
+        - segment length(16 bits)
+        - checksum(16 bits)
+    - data prefers speed, highly lossy data, video, audio.
