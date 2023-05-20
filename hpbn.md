@@ -172,4 +172,391 @@
     - Compress transferred data.
     - Position servers closer to the users to reduce roundtrip times.
     - Reuse established TCP connections whenever possible. 
-       
+
+## Building Blocks of UDP
+  
+  - User Datagram Protocol
+  - Datagram
+    - a self-contained, independent entity of data carrying sufficient information to be routed from the source to the destination nodes without reliance on earlier exchanges between
+      the nodes and the transporting network.
+  - protocol added in 1980 after introduction of TCP/IP but right as they were being split.
+  - primary feature and appeal of UDP is not in what it introduces but rather in all the features it chooses to omit.
+  - known as null protocol.
+  - packet and datagram can almost be substituted but have some nuances to them in that datagram goes with unreliable service, no delivery guarantee, no failure notifications.
+  - Domain Name Service(DNS) relies on UDP.
+  - WebRTC standards enable real-time communication such as voice and video calling and other forms of peer-to-peer(P2P) communication natively within the browser via UDP.
+
+### Null Protocol Service
+
+  - First look at IP layer found oen layer below both TCP and UDP protocols.
+  - IP layer has the primary task of delivering datagrams from the source to the destination host based on their address.
+  - To do so, they are encapsulated within an IP packet with address and other routing parameters.
+  - IP layer provides no guarantees about message delivery or notifications of failure and hence directly exposes unreliability of underlying network to the layer above it.
+  - If a routing node drops an IP packet for whatever reasons, congestion, heavy load its the responsibility of a protocol above it to detect it, recover it and retransmit the data.
+  - IPv4 header(20 bytes)
+    - 0 - 32: version, header length, dscp, ecn, total length
+    - 32 - 64: identification, flags, fragment offset
+    - 64 - 96: time-to-live, protocol, heade chechsum
+    - 96 - 128: source IP address
+    - 128 - 160: destination IP address
+    - 160: options(if present)
+  - UDP protocol encapsulates user messages into its own packet structure which adds only four additional fields, source port, destination port, length of packet and checksum.
+  - When Ip packet is delivered, host is able to unwrap packet to identify target application by destination port and deliver the message.
+  - UDP header(8 bytes)
+    - 0: source port, destination port
+    - 32: length, checksum
+    - payload.
+  - Both source ports and checksum fields are optional fields in UDP datagrams.
+  - IP contains its own header checksum and the application can choose to omit the UDP checksum, means all error detection and error correction can be delegated to applications above them.
+  - At its core, UDP simply provides "application multiplexing" on top of IP by embedding source and target applications ports of the communicating hosts.
+  - Summarize all the non-UDP service
+    - No guarantee of message delivery
+      - no acknowledgements, retransmissions or timeouts
+    - No guarantee of order of delivery
+      - no packet sequence numbers , no reordering, no head-of-line blocking
+    - No connection state tracking
+      - no connection establishment or teardown machines.
+    - No congestion control          
+      - no built-in client or network feedback mechanisms.
+  - UDP is a simple, stateless protocol suitable for bootstrapping other application protocols on top, virtually all the protocol design decisions are left to the application above it.
+  
+### UDP and NAT
+  
+  - NAT - Network Address Translators.
+  - IPv4 is 32 bits long giving 4.29 billion unique addresses.
+  - IP NAT spec was introduced to resolve looming ipv4 address depletion problem
+  - Introduce NAT devices at the edge of the network each of which would be responsible for maintaining a table mapping of local IP and port tuples to one or more globally unique IP and port tuples.
+  - The local IP address space behind the translator could then be reused among many different networks thus solving the address depletion problem.
+  - *Nothing more permanent like a temporary solution* NATs
+  - NAT middleboxes have gone to become an integral part of the internet infra'.
+  - Reserved Private Network Ranges
+    - IANA reserved three well known ranges for private networks most often residing behind a NAT.
+      - 10.0.0.0 - 10.255.255.255 = 16,777,216
+      - 172.16.0.0 - 172.31.255.255 = 1,048,576
+      - 192.168.0.0 - 192.168.255.255 = 65,536.
+      - To avoid routing errors and confusion, no public computer is allowed to be assigned an IP address from any of these reserved private network ranges.
+  
+### Connection-state Timeouts
+  
+  - The issue with NAT translation, at least as far as UDP is concerned is precisely the routing table that it must maintain to deliver the data.
+  - NAT middleboxes rely on connection state, whereas UDP has none, this is a fundamental mismatch and a source of many problems for delivering UDP datagrams.
+  - Further its not uncommon to have clients behind many layers of NATs, complicated matters further.
+  - Each TCPconnection has a well-defined protocol state machine, which begins by handshake, followed by application data transfer and a well defined exchange to close the connection.
+  - Given this flow, each middlebox can observe state of the connection and create and remove the routing entries as needed.
+  - Wiht UDP there is no handshake or connection termination and hence no connection state machine to monitor.
+  - Outbound UDP does not require extra work but routing a reply requires we have an entry in translation table that will tell us IP and port of the local destination host.
+  - Translators thus have to keep state about UDP flow which itself is stateless.
+  - Translator is also tasked with figuring out when to drop the translation record, but since UDP has no connection termination sequence, each peer could just stop transmitting datagrams at any point without notice.
+  - To address this UDP routing records are expired on a timer. Not definitive. Varying implementations
+  - Best practices for long-running sessions over UDPis introduce bidirectional keepalive packets to periodically reset the timers for the translation records in all NAT devices along the path.
+  - There is no need for TCP connection timeouts on NAT devices, TCP follows a well-defined handashake and termination sequence which signals when the appropriate records can be added or removed.
+  - Some NAT devices though apply both kind of timeouts to TCP and UDP connections leading to alternate drops.
+
+### NAT traversals.
+
+  - Unpredictable connections state handling is a serious issue created by NATs but a bigger problem is applications inability to establish UDP connections at all.
+  - Issue:
+    - in the presence of NAT, internal client is unaware of its public address, it knows its internal IP address and the NAT devices perform the rewriting of the source port and address in every UDP packet as well as originating the IP address within the IP packet.
+    - if client comunicates its private IP address as part of its application data with a peer outside of its private network then connection will inevitably fail.
+    - hence promise of transparent translation is no longer true and application must first discover its public IP address if its needs to share it with a peer outside its private network.
+    - Knowing the public IP is also not sufficient to successfully transmit with UDP.
+    - Any packet that arrives at thr public IP of a NAT device must also have a destination port and an entry in the NAT table that can translate it to an internal destination host IP and port tuple.
+    - If this entry does not exist, which is the most likely case if someone simply tries to transmit data from the public network, then the packet is simply dropped.
+    - NAT acts as a simple packet filter since it has no way to automatically to determine the internal route, unless explicitly configured by the user through a port forwarding or similar mechanism.
+    - Server affected mainly by preceding issue as opposed to clients as inbound connections.
+    
+### STUN, TURN, ICE.
+
+  - Session Traversals Utilities for NAT.
+  - protocol that allows host application to discover the presence of a network address translator and when present obtain the allocated public IP and port tuple for the current connection.
+  - to do so, requires assistance from a well-known third party STUN server that must reside on the public network.
+  - assuming IP address of STUN server is known(DNS discovery or manually specified address), first send a binding request to STUN server.
+  - STUN responds with public IP address and port of client as seen from the public network.
+  - Workflos addresses all issues form above via:
+    - App discovers its public address and port tuple and is then able to use this information as part of its application data when communicating with its peers.
+    - Outbound binding request to the STUN server establishes NAT routing entries along the path such that inbound packets can find their way to host application on the internal network.
+    - STUN protocol defines a simple mechanism for keepalive pings to keep the NAT routing entries from timing out.
+  - Workflow allows two peers to send binding requests to their respective STUN servers and following a successful response on both sides, use established public IP and port tuples to exchange data.
+  - STUN not effective for all network topologies and configs, plus firewals may block UDP.
+  - TURN, Traversal Using Relays around NAT used as a fallback, which can run over UDP and switch to TCP if all else fails.
+  - TURN relies on the presence and availability of a public relay to shuttle data between the peers.
+    - both clients begin their connections by sending an allocate reuquest to the same TURN server, followed by permission negotiation     
+    - both peers communicate by sending data to the TURN server which relays it to other peers.
+  - Obvious downside is its no longer peer-to-peer, TURN operation very high. Last resort.
+  - Google libjingle
+  - Interactive Connectivity Establishment
+    - protocol and a set of methods that seek to establish the most efficient tunnel between the participants, direct, STUN or TURN.
+    
+### Optimizing for UDP.
+
+  - simple protocol used to bootstrap new transport protocols.
+  - primary feature is all the features it omits.
+  - flexibility is also its biggest liability.
+  - RFC 5405
+  - Design guidelines for applications using UDP
+    - Apps must tolerate a wide range of internet path conditions.
+    - Apps should control rate of transmission
+    - App should perform congestion control all over the network.
+    - App should use bandwidth similar to TCP.
+    - App should back off retransmission counters after loss.
+    - App should not send datagrams that exceed path MTU
+    - App should handle datagram loss, duplication and reassembly
+    - App should be robust to deliverydelays of upto 2mins
+    - App should enable IPv4 UDP checksum and must enable IPv6 checksum.
+    - App may use keepalive when needed(15secs). 
+  -  Enter *webRTC* framework.
+  
+## Transport Layer Security
+
+- SSL protocol was implemented at the application layer, directly on top of TCP enabling protocols above it(HTTP, email, instant messaging and others) to operate unchanged while
+  providing communication security when communicating across the network.
+- When used correctly a third-party can infer connection endpoints, type of encryption, as well as the frequency and an approximate amount of data sent, but cannot read or modify any of the actual data. 
+- Application - Session - Transport - Network - Data Link - Physical
+- When SSL protocol was standardized by IETF it was renamed to TLS...used interchangebly but refer to different protocol implementations.
+- TLS 1.0 because SSL belonged to Netscape
+- TLS was designed to operate on top of a reliable transport protocol such as TCP.However it has also been adapted to run over datagram protocols such as UDP.
+- The Datagram Transport Layer Security(DTLS) protocol,defined in RFC 6347, is based on TLS protocol and is able to provide similar security guarantees.
+
+### Encryption, Authentication and Integrity
+
+- TLS designed to provide all the above services to apps running above it.
+- Encryption
+  - A mechanism to obfuscate what is sent from one computer to another
+- Authentication
+  - A mechanism to verify the validity of provided identification material
+- Integrity
+  - A mechanism to detect message tampering and forgery.
+- In order to establish cryptographically secure data channel, connection peers must agree on which ciphersuites will be used and the keys used to encrypt the data.
+- The ingenious part of this handshake and the reason TLS works in practice, is its use of public key cryptography(assymetric) which allows parties to negotiate a shared secret key without having to establish any prior knowledge of each other and to do so over an unencrypted channel.
+- Protocol also enables both connection peers to authenticate their identity, when used in browser allows client to verify that server is who it claims it is.
+- Verification is based on established chain of trust.
+- Server can also verify identify of client.
+- With encryption and authentication in place, TLS also provides its own framing mechanism and signs each message with message authentication code(MAC)
+- MAC is a one-way cryptographic hash function (checksum) the kkeys to which are negotiated by both connection peers.
+- When TLS record is sent, MAC address is attached which receiver decrypts to verify message authenticity and integrity.
+- Proxies, Intermediaries, TLS  and New Protocols on the Web.
+
+### TLS Handshake
+
+- Before client and server can begin exchanging app data over TLS, encryption tunnel must be negotiated: agree on protocol, ciphersuites, verify certs.
+- Each step requires new packet roundtrips adding startup latency to all TLS connections.
+- TLS Handshake process
+  - TLS runs over a reliable transport (TCP) which means we must first complete the TCP three-way handshake, one full roundtrip.
+  - with TCP conn in place, client sends a number of specs in plain text such as TLS protocol its running, supported ciphersuites and other TLS options it may want to use.
+  - Server picks TLS protocol for further comm, decided ciphersuite, attached its certificate and sends response back, can also request for client's cert and parameters for other TLS extensions.
+  - On successful negotiation of common version and cipher and certificate, client then generates a new symmetric key, encrypts it with servers public key and tells server to switch to new comms.
+  - All data upto now has been in plaintext with exception of new symmetric key thats encrypted with the server's public key.
+  - Server decrypts the symmetric key sent by the client, checks message integrity by verifying the MAC and returns an encrypted "finished" message to the client.
+  - Client decrypts message with the symmetric  key it generated  earlier, verifies the MAC and if all is well, tunnel is established and application data can be sent.
+- New TLS connections require 2 roundtrips for a full handshake...existence of half-handshake.
+- Given certificates are provided and configured then browser and server do all the rest.
+- TLS is two handshakes above TCP's one.
+- Performance of Public vs Symmetric Key Cryptography
+  - public-key cryptography is used during session setup of the TLS tunnel
+    - server provides its public key to the client, client generates symmetric key which it ecrypt with server's public key and returns the encrypted symmetric key to server.
+    - server can decrypt with its private key.
+  - symmetric key cryptography which uses shared secret key generated by client is then used for all further communication
+    - Done in large part to improve performance.
+    - public-key crypto is much more computationally expensive.
+  - Can run tests
+    - openssl speed rsa
+    - openssl speed aes
+
+### Application Layer Protocol Negotiation (ALPN)
+
+- Network peers may want to use custom protocols to communicate: as opposed to 80 for HTTP and 443 for TLS 
+- TLS extension that introduces support for application protocol negotiatio into the TLS handshake eliminating need for extra roundtrip required by HTTP upgrade
+- Client appends a new ProtocolNameList field containing list of  supported application protocols
+- Server inspects that field and returns a ProtocolName field indicating selected protocol as part of ServerHello message.
+- Abort connection if does not support any of the protocols listed.
+- NPN Aand ALPN, server and client first
+
+### Server Name Indication
+
+- What if server wants to host multiple independent sites, each with its own TLS certificate, on the same IP address??
+- SNI extension was introduced to TLS protocol, allows client to indicate the hostname its attempting to connect to at start of handshake.
+- Web server can inspect SNI hostname, select certificate and continue handshake.
+
+### TLS Session resumption
+
+- Extra latency and computational costs of TLS impose serious performance penalty on all apps that require secure connections.
+- To mitigate this TLS provides mechanism to resume or share negotiated secret key data between multiple connections.
+
+#### Session Identifiers
+
+- Introduced in SSL 2.0, which allowed a server to create and send a 32-byte session identifier as part of its ServerHello message.
+- Internally server could maintain a cache of sessions IDs and negotiated session parameters for each peer.
+- In turn client could also store session ID information and include the ID in CLientHello for subsequent sessions which served as indication of memory of params and can reuse them.
+- If both can find their shared session IDparameters in respective caches then abbreviated handshake can take place.
+- Leveraging session identifiers eliminates round trips and computational costs of public key cryptography.
+- In practice, most web apps attempt to establish multiple connection to the same host to fetch resources in parallel, making session resumption a must-have optimization.
+- most browsers wait for the first connection to complete so they can reuse SSL session parameters.
+- Practical limitation of this is that server has to create and maintain a session cache for every client...esp for servers with millions of connections, memory consumption, cache and eviction policies and nontrivial deployment challenges.
+
+#### Session Tickets
+
+- Introduced, removing the need for the server to maintain per client session state.
+- Instead if client indicated that it supports Session tickets in the last TLS handshake, the server can include a New Session Ticket record which includes all of the session data encrypted with a secret key known only by the server.
+- This session ticket is then stored by the client and can be included in the SessionTicket extension within the ClientHello message of a subsequent session.
+- Thus all session data is stored only on the client, but ticket is still safe because it is encrypted with a key known only by a server.
+
+- Session identifiers and session tickets are commonly known as session caching and stateless resumption mechanisms.
+- Session tickets improvemnts is the removal of server-side session cache, simplifying deployment.
+
+## Chain of Trust and Certificate Authorities
+
+- Authentication is an integral part of establishing every TCP connection.
+- Unless one can verify identity of the one communicating with then all encryption work can be for nought.
+- Introduce concept of chain of trust.
+- Whom does your browser trust and whom do you trust when you use the browser.
+- Answers:
+  - Manually specified certificates
+    - every browser and operating system provides a mechanism for you to manually import any certificate you trust.
+    - how you obtain and verify its integrity is completely up to you.
+  - Certificate Authorities
+    - A CA is a trusted third party that is trusted by both the subject(owner) and party relying upon the certificate.
+  - The browser and the operating system.
+    - every operating system and browser ship with a list of well-knonw certificate authorities, thus trust software vendor.
+- Certificate Authorities are the most common solution.
+- Browser specifies which CA to use(root CA) and the burden is then on them to verify each site they sign and to audit and verify against misuse and compromise.
+- Every browser allows you to inspect the chain of trust of your connection by clicking on lock icon.
+- Site cert - Intermediate cert - Root CA cert
+- Operating system and browsers provide public list of CAs that they trust by default.
+- As many as they are they do create a large surface attack for intruders.
+
+### Certificate Revocation
+
+- Can happen to cert compromise, authority itself compromised.
+- Certs themselves contain instructions on how to check if they have been revoked.
+- Chain of trust is then erliant on checking those instructions as it walks up the certificate chain.
+
+### Ceritificate Revocation List
+
+- specifies a simple mechanism to check status of every certificate, each CA maintains and periodically published a list of revoked cert serial numbers.
+- CRL file itself can be published periodically or on every update and can be delivered via HTTP or any other file protocol.
+- List is signed by CA and allowed to be cached for a specified interval.
+- Works well until it doesnt i.e
+  - CRL list grow a bit longer than necessary.
+  - No mechanism for instant notification of ceritificate revocation so depending on cache status, certificate may or may not be allowed.
+- Enter:
+
+### Online Certificate Status Protocol(OCSP)
+
+- provides a mechanism to perform a real-time check on the status of the certificate.
+- Allows CA to query the serial number of the certificate in question while validating the certificate chain.
+- OCSP should consume much less bandwidth and is able to provide real-time validation.
+- This also comes with its issues:
+  - CA handle load of queries.
+  - Service is up and gloablly available at all times.
+  - Client blocks on OCSP requests before navigation proceed.
+  - Real-time OCSP impairs client's privacy as CA knows which sites they are visiting.
+  
+- In practice CRL and OCSP are complementary and most certs will provide instructions and endpoints for both.
+
+## TLS Record Protocol
+
+- all data exchanged within a TLS session is also framed using a well-defined protocol.
+- The record protocol is responsible for identifying different types of messages(handshakes, alert or data) via content type field as well as verifying and securing each message.
+- Typical workflowfor delivering application data is as follows:
+  - Record protocol receives application data.
+  - Received data is divided into blocks: max 2^14 bytes or 16KB per record.
+  - App data is optionally compressed.
+  - Message Authentication Code is added.
+  - Data encrypted using negotiated cipher.
+  - Data is then passed down to the TCP layer for transport.
+  - On receiving end, same process but in reverse.
+- All work above is handles by the TLS layer and transparent to most applications.
+- Record protocol has a few implications namely:
+  - Max TLS record size is 16KB.
+  - Each block contains a 5-byte header, a MAC(20bytes for SSL, TLS1 and 32bytes for TLS 1.2) and a padding is block cipher is used.
+  - To decrypt and verify the record, the entire record must be available.
+- Picking the right record size for your application if you can is an important optimization.
+- Small records incur a larger overhead due to record framing whereas large records will have to be delivered and reassembled by the TCP layer before they can be processed by the TLS layer and delivered to the application.
+
+### Optimizing for TLS
+
+- Optimize for TCP first.
+- Should investigate operational pieces of your TLS deployments:
+  - how and where you deploy your servers
+  - size of TLS records and memory buffers
+  - certificate sizes
+  - support for abbreviated handhshakes.
+- Getting above right can not only improve application user experience but also improve operational costs.
+
+#### Computational costs
+
+- establishing and maintaining an encrypted channel introduces additional computational costs for both peers.
+- modern h/w improvements minimized those costs, CPU can now handle such calculations.
+- FB and Google do it at scale.
+- SSL/TLS is not computationally expensive anymore.
+- Upgrade your SSL libraries to the latest release and build your web server or proxy against them.
+
+#### Early Termination
+
+- connection setup latency imposed on every TLS connection, new or resumed is an important area of optimization.
+- The higher the latency the worser the penalty
+- simple technique of placing the serves closer to your users to minimize latency cost of each roundtrip between client and the server.
+- Simplest way to do this is replicate or cache your data and services around the world.
+- Nearby server can also terminate TLS session reducing TCP and TLS roundtrips and connection latencies 
+- Same nearby server can also establish a pool oflong-lived, secure connections tothe origin servers and proxy all incoming requests and responses to and from the origin servers.
+- One can also: spin up cloud servers in a few data centers around the globe, configure a proxy server on each to forward requests to your origin, add geographic DNS load balancing.
+- Uncached Origin Fetch
+  - use a CDN or a proxy server to fetch a resource which may need to be customized per user or contains other private data and hence is not a globally cacheable resource at the edge.
+  - CDN maintains a warm connection pool to relay data to the origin  servers.
+
+#### Session Caching and Stateless Resumption
+
+- No bit is faster than a bit not sent.
+- enabling this will eliminate an entire roundtrip for repeat visitors.
+- Do not assume session support will be on by default.
+- Size of shared session cache should be tuned to traffic levels.
+- Enable both
+
+#### TLS Record size
+
+- each record size is 16KB.
+- 60-100bytes of overhead for each record.
+- Small records incur overhead, large records incur latency
+- Each TCP packet should carry at least one TLS record and it should occupy maximum segment size allocated.
+- Don't use TLS records that span multiple TCP packets
+- Check server documentation on how to adjust and configure this setting.
+- For optimal deployment:
+  - allocate 20 bytes for ipv4 framing overhead and 40 bytes for ipv6.
+  - allocate 20 bytes for TCP framing
+  - allocate 40 bytes for TCP options overhead.
+
+#### TLS compression
+
+- little-known feature of TLS is built-in support for lossless compression of data transferred within the record protocol, algo is negotiated on TLS handshake and applied prior to encryption.
+- However advisable to disable compression by default
+  - CRIME attack leveraged it to get auth cookies and perform session hijacking
+  - not content aware and may compress compressed data.
+- Double compression wastes CPU time on noth client and server.
+- ENsure though that it Gzip all text based assets and optimal one for all other formats.
+
+#### Cerificate Chain length
+
+- verify that the server does not forget to include all certs when handshake is performed.
+- don;t include unnecessary cert in your chain though.
+- Aim to minimise size of certificate chain.
+- Sent on TLS runnigng on slow-start TCP connection adding another roundtrip to the handshake
+- Minimize number of intermediate CAs. should include two, your site and CAs intermediary cert use this as CA selection criteria.
+- Root CA cert should already be in broser so dont include in chain.
+- should be as low as 2 or 3 KB.
+
+#### OCSP stapling
+
+- server can include the OCSP response from the CA to its certificate chain, allowing browser to skip online check.
+- However pay attention tha t it does not overflow congestion window.
+- Only one response can be included.
+- See if server supports this feature in its docs.
+
+#### HTTP Strict Transport Security
+
+- security policy mechanism that allows server to declare access rules to a compliant browser via a HTTP header.
+- max-age field.
+- converts the origin to an HTTPS-only destination and helps protect the application from passive and active network attacks against user.
+
+#### Testing and Verification 
+
+- Familiriase yourself with the openssl commandline interface, which will help you inspect the entire handshake and configuration of your server locally.

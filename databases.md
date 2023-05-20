@@ -3071,4 +3071,32 @@ CMU PATH - Storage -> Execution -> Concurrency control -> Recovery -> Distribute
     - Not portable
     - DBSs dont like change
     - Potentially need tomaintain different versions.
-    
+
+## IN-MEMORY DATABASES
+
+- Development history of DBMS is about dealing with limitations of hardware.
+- DRAM capacities are large enough that most databases can fit in memory
+  - structured data sets are smaller
+  - unstructured or semi-structured data sets are larger.
+- Why not use traditional disk oriented DBMS with a really large cache??
+- Buffer Pool
+- Concurrency control
+- Logging and Recovery: STEAL + NO0FORCE buffer pool policies
+- LSN - log sequence numbers.
+- ref paper:`OLTP through the looking glass and what we found there`
+- Assume that the primary storage location of the database is permanently in memory.
+- storage access latencies
+- ref paper:`lets talk about storage and recovery methods for non-volatile memory database systems`
+- Data organization
+  - an in-memory DBMS does not need to store the database in slotted pages but it will still organize tuples in blocks/pages
+    - direct memory pointers vs record ids
+    - fixed-lenght vs variable-lenght data pools
+    - use checksums to detect software errors from trashing the database.
+- Why not Mmap???
+- Query processing
+- Timesten 
+- ref paper:`oracle timesten:`
+- Dali
+- ref paper:`dali:a high performance main memory storage manager`
+- P* Time
+- ref paper:`p*time:highly scalable oltp dbms for managing update-intensive stream workload`
