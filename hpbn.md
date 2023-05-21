@@ -560,3 +560,228 @@
 #### Testing and Verification 
 
 - Familiriase yourself with the openssl commandline interface, which will help you inspect the entire handshake and configuration of your server locally.
+
+
+## HTTP
+
+- This is the common language between clients and servers.
+- HTTP 0.9: The One-line Protocol.
+  - High level design goals
+    - file transfer functionality
+    - ability to request an index search of a hypertext archive.
+    - format negotiation
+    - ability to refer client to another server.
+  - Prototype built with following features.
+    - Client request is a single ASCII character string.
+    - Client request is terminated by a carriage return(CRLF)
+    - Server response is an ASCII character stream.
+    - Server response is HTML.
+    - Connection terminated after document transfer is complete.
+  - Apache and Nginx still support it given there isnt much to it.
+
+- HTTP 1.0: Rapid growth and Informational RFC
+  - Growing list of desired capabilities of the nascent web and their use cases on the public web quickly exposed many of the fundamental limitations of HTTP 0.9
+  - RFC 1945, Informational not a spec or standard.
+  - Key protocol changes
+    - request may consist of multiple newline separated header files.
+    - response object is prefixed with a response status line.
+    - response has its own set of newline separated header fields
+    - reponse object is not limited to hypertext, could be image, plain text or any content type.
+    - connection closed after every request.
+    - Other features included
+      - content encoding
+      - character set support
+      - multipart types.
+      - authorization.
+      - caching
+      - proxy behaviour
+      - data formats.
+
+- HTTP 1.1:Internet Standard
+  - RFC 2068, RFC 2616
+  - Introduced alot of critical performance optimizations:
+    - keepalive connections
+    - chunked encoding transfers
+    - byte-range requests
+    - additional caching mechanisms
+    - transfer encoding
+    - request pipelining
+
+- HTTP 2.0: Improving Transport Performance
+  - RFC 2616 has served as the foundation for the unprecedented growth of the internet, billions of devices...
+  - A feature of HTTP is the typing and negotiation of data representation, allowing systems to be built idnependently of the data being transfered.
+  - Primary focus of HTTP 2.0 is on improving transport performance and enabling both lower latency and higher throughput.
+  - Non of the high level protocol semantics are affected.
+
+### Primer on Web performance
+
+- In any complex system a large part of performance optimization is untangling of the interactions between the many distinct and separate layers of the system each with its own set of constraints and limitations.
+- End-to-end picture of web performance optimization:
+  - Impact of latency and bandwidth on web performance
+  - TCP constrains imposed on HTTP.
+  - Features and shortcomings of the HTTP protocol itself
+  - Web app;ication trends and performance requirements
+  - Browser constraints and optimizations.
+- No one solutions as the layers themselves keep changing, browsers getting faster, web apps profiles change  
+
+#### Hypertext, Web pages and Web Applications
+
+- Hypertext
+  - plain text versions with some basic formatting and support for hyperlinks.
+- Web pages
+  - Extended hypertext definition to support additional hypermedia resources, images, audio.
+- Web Apps
+  - DHTML and AJAX allowed for response to user action direclty in the browser.
+- Page Load Time(PLT) - time to onload event in browser, event is fired once a document and all its dependent resources have finished loading.
+- With web apps PLT becomes an insufficient performance benchmark as we also want to answer application specific questions.
+  - What are the milestones in the loading progrss of the app?
+  - What are the times to first interaction?
+  - What are the interactions user should engage in?
+  - What are the engagements and conversion rates for each user?
+- The success of your performance and optimization strategy is directly correlated to your ability to define and iterate on application specific benchmarks and criteria.
+- Nothing beats application specific knowledge and measurements, esp when linked with bottom line goals and metrics of your business.
+- HTML DOM and CSS CSSOM are combined to create a render tree used to perform a layout and paint on the screen.
+- Script execution though can issue a synchronous doc.write and block DOM parsing and construction.
+- Similarly scripts can also query for a styled version of an object meaning block on CSS too.
+- Interaction is intertwined meaning, DOM cannot proceed until Js is executed and Js waits on CSSOM.
+- Performance of your application, esp first load and time to render depends on dependency graph resolution strategy.
+- Styles at the top, scripts at the bottom.
+
+#### Anatomy of Modern Web Application
+
+- refer to HTTP Archive website, peridically crawls popular sites for statistics on this.
+- Web apps are running the installation process on each and every visit.
+- Speed, performance and user perception
+  - If application mist react and respond to a user, we must plan and desing for specific, user-centric perceptual processing time constants.
+  - Aim for rendering in under 250ms to keep user engaged
+  - Faster sites yield more page views, higher engagement and higher conversion rates.
+- Analyzing resource waterfall
+  - is likely the single most insightful network performance and diagnostic tool at our disposal
+  - Webpagetest.org, tests performance of web pages from multiple locations around the world.
+  - recognize that every HTTP request is composed of a number of separate stages: 
+    - DNS resolution, TCP connection handshake, TLS negotiation, dispatch of the HTTP request, Content download.
+  - HTML parsing is done incrementally, allowing browser to discover required resources early and dispatch the necessary request in parallel.
+  - Scheduling of when resource is fetched is in large part determined by the structure of the markup., browser may prioritze some but incremental discovery of each resource in document is what creates the distinct resource "Waterfall effect"
+  - Above is front-end performance analysis
+  - Resorce waterfall lookup(individual HTTP request) vs the connection view(lifetime of each TCP connection)
+  - Main bottlenect in web applcations is network latency between client and server and not the bandwidth.
+- Performance pillars: Computing, Rendering, Networking
+  - execution of a web program involves: Fetching resource, page layout and rendering and Js execution.
+  - Rendering and scripting steps follow a single threaded interleaved model of execution, not possible to perform concurrent mods on the DOM.
+  - Fast and efficieent delivery of network resources is the performance keystone of each and every application running in the browser.
+  - Roundtrip latency matters most.
+- Synthetic and real user performance measurements
+  - No single metric holds true for all applications which means custom metrics defined for each case.
+  - Perfomance data then gatjered using synthetic and real user perf measurements.
+  - Synthetic testing refers to any process with a controlled measurement environment: local build running through performance suite, load testing against staging infrastructure 
+    or a set of geo-distributed monitoring servers that periodically perform a set of scripted actions and log the outcomes.
+  - Each and every one of these tests may test a different piece of infastructure and serves as a stable baseline to help detect regressions or narrow in on a specific component of the system.
+  - However synthetic is not a one catch all solution and may fail agianst
+    - Different user page navigation behaviour
+    - Browser Cache
+    - Intemediaries: proxies and caches may differ.
+    - Diveristy of hardware: range of CPUs GPUs and memory perfomance
+    - Browser diversity: 
+    - Connectivity
+  - To solve for above supplement synthetic startegy with Real User Measurements....Navigation Timing API, User Timing, Resource Timing
+  - Navigation Timing API
+    - DNS and TLS connect times via standardized performance.timing object
+  - Resource Timing 
+    - provides data for each resource on the page, allowing for full profile of the page.
+  - User Timing  
+    - mark and measure application-specific performance metrics with help of high-resolution timers.
+- Browser Optimization
+  - modern browser is more than just a simple network socket manager.
+  - broad categories
+    - Document-aware optimizations
+      - networking stack is integrated with the document, css and js parsing pipelines to help identify and prioritize  critical network assets, dispatch them early and get the page to an interactive state as soon as possible.
+      - this is via  resource priority assignments, lookeahead parsing.
+    - Speculative optimizations
+      - browser may learn user naviagtion patterns over time and perform speculative optimizations in an attempt to predict the likely user actions by pre-resolve and pre-connect.
+  - techniques
+    - Resource pre-fetching and prioritization
+      - parsers communicate extra info to network to indicate ralative priority of each resource
+    - DNS pre-resolve
+      - user-action triggered, i.e hover over link, learned navigation
+    - TCP pre-connect
+      - on DNS pre-resolve, TCP connection may be opened in anticipationof a HTTP request
+    - Page pre-rendering
+  - How can we assist browser in performance optimization
+    - pay close attention to the structure and delivery of each page
+      - critical resources such as CSS ad Js should be discoverable as early as possible in the document.
+      - CSS should be delivered as early as possible to unblock rendering and Js execution.
+      - Noncritical Js should be deferred to vaoid DOM and CSSOM construction
+      - HTML document is parsed incrementally by the parser: hence document should be periodically flushed for better performance.
+    - additionally embed hints into document itself to tip off browser about additional optimizations it can perform on our behalf
+      - check browser support for speculative browser optimizations hints.
+  
+## HTTP 1.X
+
+- HTTP 1.0 best optimization is upgrading to HTTP 1.1
+- Among the features introduced
+  - Persistent connections to allow connections eruse
+  - Chunked transfer encoding to allow response streaming
+  - Request pipelining to allow parallel request processing
+  - Byte serving to allow range-based resource requests
+  - Improved and much better specified caching mechanism
+- Based on Steve Souders High Perfomance Websites book, networking optimizations include:
+  - Reduce DNS lookups
+  - Make fewer HTTP requests
+  - Use a CDN.
+  - Add an Expires header and configure ETags
+  - Gzip assets
+  - Avoid HTTP redirects
+- Benefits of keepalive connections
+- HTTP pipelining
+  - allows for relocation the FIFO queue fron the client(request queueing) to the server(response queueing) created by preceding HTTP persistence feature.
+  - eliminates also request propagation latency and request propagation latency to allow server to process requests in parallel 
+- Important limitation of HTTP 1.X is strict serialization of returned responses, does not allow data from multiple requests to be interleaved on same connection.
+- Head-of-line blocking also enountered here for requests that preceded others have to finish first.
+- The best way to deploy HTTP pipelining is to create a secure (HTTPS) tunnel between the client and server.
+- Using multiple TCP connections
+  - most modern upto 6 connections per host.
+  - meditate on the implications of that.
+    - competition for shared badnwidth
+    - limited application parallelism even in parallel TCP streams
+    - implementation complexity for handling collections of sockets.
+    - extra memory buffers and CPU overhead.
+  - still desirable because:
+    - workaround to limitations of the application protocol HTTP
+    - workaround for low starting congestion window size in TCP
+    - workaround for clients that cannot use TCP window scaling
+- Domain Sharding
+  - instead of serving all resources from the same origin, we can manually shard them across multiple subdomains.
+  - the higher the shard count the higher the parallelism.
+  - not a quick solution as domain has to be managed, DNS lookup costs apply
+- Measuring and Controlling Protocol Overhead
+  - each HTTP request will carry 500-800bytes of metadata...without cookies used for session management, analytics and personalization.
+  - reducing transferred header data, highly repetitive and uncompressed could save entire roundtrips pf network latency and improve app performance.
+- Concatenation and Spriting
+  - Concatenation 
+    - multiple javascript or css files are combined into a single resource
+  - Spriting
+    - multiple images are combined into a larger, composite image.
+  - Advantages
+    - Reduced protocol overhead: one file's overhead is smaller than many files overheads
+    - Application-layer pipelining: moving pipelining logic one layer above into our application
+  - They are both types of content aware application layer optimizations which can also bring about additional preprocessing, deployment considerations and code.
+  - May have negative impact on cache performance and execution speed of pages
+  - We sacrifice modulariy and cache granularity which can quickly backfire if there is a high churn on the asset and especially if the bundle is large.
+- Calculating Image memory requirements
+  - stored as memory backed RGBA bitmaps within the browser
+  - each RGBA image pixel requires four bytes of memory (red 1, green 1, blue 1, transparency 1)
+  - hence total memory = pixel width * pixel height * 4 bytes
+  - 800 * 600 * 4 = 1.83MB
+- Js and CSS processing models dont allow incremental execution, whole file has to be there.
+- CSS and JS bundle size vs execution performance - idela bundle sizes??
+- Resource Inlining 
+  - embed the resource within the document itself.
+  - base64 encoding used for non-text assets adding a 33% byte expansion overhead.
+  - consider inlining resource under 1-2 KB.
+  - bundling vs inlining, high use across site vs small limited
+  
+
+## HTTP 2.0
+
+- move the workarounds in our application while using HTTP 1.1 to the transport layer itself, opening a whole new way to optimize our applications and improve performance.
+-
