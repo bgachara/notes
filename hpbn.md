@@ -784,4 +784,165 @@
 ## HTTP 2.0
 
 - move the workarounds in our application while using HTTP 1.1 to the transport layer itself, opening a whole new way to optimize our applications and improve performance.
--
+- Primary goals
+  - reduce latency by enabling full request and response multiplexing
+  - minimize protocol overhead via efficient compression of HTTP header fields.
+  - support for request prioritization.
+  - Support for server push.
+- Does not modify application semantics in any way and core concepts remain in place.
+- Also enables alot of new optimizations our application can leverage, previously not possible.
+
+### SPDY
+
+- Project goals
+  - target a 50% reduction in page laod times
+  - Avoid need for change to content by website authors
+  - Minimize deployment complexity, avoid changes in network infrastructure.
+  - Develop it in collaboration with Open source community.
+  - Gather real data to invalidate experimental protocol.
+- Sparket HTTP 2.0 track
+
+### Road to HTTP 2.0
+
+- Key design criteria
+  - Improve end-user perceived latency over HTTP 1.1 using TCP.
+  - Address head-of-line blocking 
+  - Not require multiple connections to a server to enable parallelism, thus improving its use of TCP, esp on congestion control.
+  - Retain semantics of HTTP 1.1
+  - Define how HTTP 2.0 interacts with HTTP 1.x intermediaries.
+  - Identify extensibility points and policy for their appropriate use
+- Reason for major revision increment to 2.0 is due to change in how data is exchanged between client and server.
+- HTTP 2.0 adds a new binary framing layer which is not backward compatible 
+- SPDY serves as vehicle for experimenting with new features and proposals for HTTP 2.0
+
+### Desing and Implementation goals
+
+- Binary Framing Layer
+  - layer refers a design choice to introduce a new mechanism between the socket interface and the higher HTTP API exposed to our application.
+  - both client and server must use the new binary encoding mechanism to understand each other.
+
+- Streams, Messages and Frames
+  - Stream
+    - a bidirectional flow of bytes within an established connection
+  - Message
+    - a complete sequence of frames that map to a logical message.
+  - Frame
+    - smallest unit of communication in HTTP 2.0, each containing a frame header, which at minimum identifies the stream to which the frame belongs
+  - All HTTP communication is performed within a connection that can carry any number of bidirectional streams, each stream communicates in messages, which contain one or multiple frames. each which can be interleaved 
+    and then reassembled via the embedded stream identifier in the header of each individual frame. 
+
+### Request and Response Multiplexing
+
+- The ability to break down a HTTP message into independent frames, interleave then and then reassemble them on the other end is the single most important enhancement of HTTP 2.0
+- This eliminates need for HTTP 1.X workarounds such as concatenated files, image sprites and domain sharding.
+
+### Request Prioritization
+
+- Once a HTTP message can be split into many individual frames, exact order of interleaving nd delivery can be optimized for further improvement to perfomnce of our apps.
+- Each frame is assigned a 31-bit  priority value
+- Different strategies applied to deal with streams, messages and frames in an optimal way  depending on the priority values.
+- Client should provide good priority data.
+
+### One connection per Origin
+
+- Due to the new binary framing mechanism in place, no need for multiple connections to multiplex connections in parallel , each stream can now be split into many frames.
+- all HTTP 2.0 connections are persistent.
+- Also reduces connection overhead, fewer connections to manage, smaller memory footprint, better connection throughput, better compression through use of single compression context, improved network congestion, less itme in slow-start and faster congestion and loss recovery.
+
+### Flow control
+
+- Multiplexing multiple streams over the same TCP connection introduces contention for shared bandwidth resources.
+- Stream priorities can help determine relative order of delivery but priorities alone are insufficient to control ow resource allocation is performed between streams and multiple connections.
+- On HTTP 2.0 connection, client and server exchange SETTINGS frame, which sets the flow control window sizes in both directions.
+- Similar to TCP flow control in that it is hop-by-hop, meaning its based on window update frames.
+
+### Server Push
+
+- Ability of a server to send multiple replies to a single client request.
+- In addition to responses, it can also push resources not explicitly requested by the client.
+- One connection, SETTINGS frame can limit maximum number of concurrent streams in both directions, hence client can limit number of pushed streams or disable server push entirely.
+- This is useful in the case of multiple resources where the server pushes them without explicit request, hence reducing request latency.
+- Inlining is an example of server push
+- Pushed resources can be cached, declined by client, reused across different pages and prioritized by server.
+- All pushed resources are subject to sam eorigin policy, must be authoritative for provided content.
+- PUSH_PROMISE frame sent with a response, indicate intent to push.
+
+### Header Compression
+
+- Compresses header metadata
+- Use of header tables on both sides to prevent retransmission of same data on each request and response by storing previously sent key-value pairs.
+- Header tables persisted for each connection and incrementally updates by client and server
+- Each new header key-value pair is either appended to the existing table or replaces a previous value in the table.
+- All header keys are lowercase and request line is split into individual :method, :scheme, :host and :path key-value pairs.
+- Second request needs only communicate only the single path header that has changed between requests, all other headers are inherited from previous working set.
+- Avoids transmitting redundant header data.
+
+### Efficient HTTP 2.0 Upgrade And Discovery
+
+- Most browsers use efficient background update mechanisms
+- Cases to consider
+  - Initiate a new HTTP connection via TLS and ALPN(Application Layer Protocol Negotiation)
+  - Initiate a new HTTP connection with prior knowledge
+  - Initiate a new HTTP connection without prior knowledge
+- HTTP upgrade mechanism to negotiate appropriate protocol.
+- Both client and server have to send a connection header which is a well known sequence of bytes defined in standard.
+- Client can also choose to obtain HTTP 2.0 support information in another way..DNS record, manual configinstead of relying on upgrade workflow.
+
+### Binary Framing Primer
+
+- Offers more compact representation and is both easier and more efficient to process in code.
+- All frames share a common 8 byte header, which contains length of frame, its type, a bit field of flags and a 31-bit stream identifier.
+  - 16bit length prefix tells us a single frame can carry 2^16 - 1 bytes of data, which excludes the 8-byte header size.
+  - 8-bit type field determines how rest of frame is interpreted.
+  - 8-bit flags field allows different frame types to define frame-specific messaging flags
+  - I-bit reserved flags always set to 0
+  - 31-bit stream uniquely identifies the HTTP 2.0 stream
+- *write a simple parser to examine any HTTP 2.0 bytestream and take it apart*
+- HTTP standard defines types of frames
+  - DATA, HEADERS, PRIORITY, RST_STREAM, SETTINGS, PUSH_PROMISE, PING, GOAWAY, WINDOW_UPDATE, CONTINUATION.
+
+### Framing Layer workflow
+
+- Initiating a new stream
+  - client init start with HEADER frame
+  - server init start with PUSH_PROMISE frame
+  - payload sent separately within DATA frames.
+  - stream counters are even-offset for clients IDs and odd-offset for server IDs, eliminating collision in stream IDs.
+- Exchanging application data.
+  - payload can be split between multiple DATA frames with the last frame indicating the end of message by toggling the END_STREAM flag in the header of the frame.
+  - choice of encoding deferred to the application or server
+  - HTTP 2.0 requires DATA frame not exceed 2^14 even though 2^16 is available to reduce head-of-line blocking, exceeding this should be broken up into multiple DATA frames.
+
+### Analyzing HTTP 2.0 Frame Data Flow
+
+- leaarn how to do this.
+
+
+## Optimising Application Delivery  
+
+- We can't control network weather between client and server , nor client hardware or the device configuration.
+- TCP, TLS configuration on the server and dozens of application optimizations to account for the pecularities of the different physical leyers, versions of HTTP in use as well general app best practices.
+- Physical properties of the communication channel set hard performance limits on every application.
+  - speed of light and distance determine propagation latency
+  - choice of medium(wired or wireless) determines processing, transmission, queueing and other delays incurred by each data packet.
+- Apply all optimization to minimise or eliminate unnecessary round trips, requests and minimize the distance traveled by each packet
+- Developing and investing into appropriate  measurement tools and application metrics is top priority.
+- Evergreen Performance best practices
+  - Cache resources on the client
+    - cache specific headers, cache-control, last-modified, ETag
+  - Compress assets during transfer
+    - choose the right image compression algo/ format.
+    - webp 26% smalller than png, 34% smaller than jpeg, supports lossless compression
+    - hiher amount of cpu processing for decoding 1.4 times compared to jpeg
+  - Eliminate unnecessary request bytes
+    - HTTP is stateless, meaning server does not have to store data about client between different requests
+    - HTTP state management mechanism, RFC 2965, allows for cookie metadata saving and update
+    - most browser enforce a 4KBlimit as non is specified, should be monitored judiciously
+    - take advantage of shared session cache on server to lookupother metadata.
+    - also allows for many cookies per origin
+  - Parallelize request and response processing
+  - Apply protocol specific optimizations
+  
+  
+## Browser APIs and Protocols
+  
