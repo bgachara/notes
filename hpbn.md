@@ -1,5 +1,8 @@
 # High Performance Browser Networking
 
+ref:`High Performance Browser Networking`
+    `HTTP: The Definitive Guide`
+    
 
 ## Networking 101
 
@@ -945,4 +948,5 @@
   
   
 ## Browser APIs and Protocols
-  
+
+## HTTP AGAIN!!!
