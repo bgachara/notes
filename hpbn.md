@@ -949,4 +949,207 @@ ref:`High Performance Browser Networking`
   
 ## Browser APIs and Protocols
 
+--- skip this kidogo ---
+
+
 ## HTTP AGAIN!!!
+
+- Web servers and clients
+- Resources
+- Transactions
+- Messages
+- Connections
+- Architectural components of the Web
+
+### URLs and Resources
+
+- Uniform Resource Locators are the standardized name for the internet's resources.
+- URLs are a subset of a more general class of resource identifier called a uniform resource identifier(URI)
+- URI are a general concept consisting of a two main subsets URLs and URNs
+- URNs identify resources by name regardless of where they reside.
+- URL parts:
+  - first part is the scheme: tells web client how to access the resource: HTTP
+  - second part is the server location: tells it where its located.
+  - third part is the resource path: what particular resource is being requested
+- URLs can direct you to resources available through other protocols other than HTTP, pointing you to any resource on the internet.
+- i.e email, mailto: , ftp: file transfer, rtsp: movie off streaming sites.
+- URL syntax
+  - <scheme>://<user>:<password>@<host>:<port>/<path>;<params>?<query>#<frag>
+  - params - provide applications with additional information that they need to access the resource, name:value pairs.
+  - query - introduction of a query component after ?, query component, named:value pairs separated by &. i.e database services.
+  - frag - allows referencing parts or fragments of a resource, dangles off right side of URL, preceded by a # character. enforced at the client not server as HTTP doesnt have that functionality.
+- Relative URLs
+- Expandomatic URLs
+  - hostname expansion 
+  - history expansion
+- URL character set
+  - encoding mechanisms
+    - escape character is %HX, % followed by 2 hex digits that represent that character
+    - character restricctions
+      - [%, /, #, ., .., :, ;, ?, &@=]
+      - > 0x7F, 0x00-0x1F
+- Schemes
+  - http, https
+  - mailto
+  - ftp
+  - rtsp, rtspu
+  - file
+  - news
+  - telnet
+  
+### HTTP Messages
+
+- HTTP messages are the blocks of data that are sent between HTTP applications
+- Messages commute inbound to the origin server.
+- Messages flow downstream
+
+#### Parts of a message
+
+- 3 parts
+  - start line
+  - block of headers containing attributes
+  - optional body containing data.
+- Start line and header are just ASCII text broken up by lines, each line ending with a two character end-of-line sequence.
+- Entity body or message body is simply an optional chunk of data, and can contain text or binary data or can be empty.
+- Message syntax
+  - request messages and response messages.
+  - request
+    - method, request-URL, version
+    - headers
+    - entity-body
+  - response
+    - version, status, reason-phrase
+    - headers
+    - entity-body
+- Start Lines
+  - Request line
+    - contains method describing what operation the  server should perform and a request URL describing which to perform the method.
+    - also contains HTTP version client is speaking
+  - Response line
+    - contains HTTP version that response message is using, a numeric status code, textual-phrase
+  - Mthods
+    - GET: safe
+    - HEAD: 
+      - safe, only retrun the headers, 
+      - find out about a resource without getting it, exists, modified.
+    - POST
+      - send input data to the server
+    - PUT
+      - writes documents to a server.
+      - create a new resource or replace it.
+    - TRACE
+      - track path of the request
+      - initiates a loopback diagnostic at the server.
+      - diagnostics
+    - OPTIONS
+      - asks server to tell us about the various capabilities of the web server.
+    - DELETE
+    - Not all servers implement all seven methods.
+  - Status codes
+    - tell client what happened
+    - 100 - 199: informational.
+    - 200 - 299: success
+    - 300 - 399: redirection / resource have been moved
+    - 400 - 499: client error
+    - 500 - 599: server error
+  - Reason phrases
+    - paired one-to-one with status codes.
+  - version numbers
+    - format HTTP/x.y
+    - HTTP applications to tell each other which version of the protocol they conform to.
+- Headers
+  - add additional information to request and response messages.
+  - list of name/value pairs
+  - Header classifications
+    - General headers
+      - can appear in both request and response messages
+      - include:
+        - connection
+        - date
+        - MIME-version
+        - Trailer
+        - Transfer-Encoding
+        - Upgrade
+        - Via
+        - Caching headers
+          - cache-control
+          - pragma
+    - Request headers
+      - more information on request
+      - Include;
+        - client-ip
+        - From
+        - Host
+        - Referer
+        - UA-color
+        - UA-CPU
+        - UA-Disp
+        - UA-OS
+        - UA-Pixels
+        - User-Agent
+      - Accept Headers
+        - Accept
+        - Accept-charset
+        - Aceept-encoding
+        - Accept-language
+        - TE
+      - Coonection request headers
+        - Expect
+        - If-Match
+        - If-Modified-Since
+        - If-None-Match
+        - If-Range
+        - If-Unmodified-Since
+        - Range
+      - Request security headers
+        - Authorization
+        - Cookie
+      - Proxy request headers
+        - Max-forwards
+        - Proxy-Authorization
+        - Proxy-connection
+    - Response headers
+      - more information about the response.
+      - Include
+        - Age
+        - Public
+        - Retry-After
+        - Server
+        - Title
+        - Warning
+      - Negotiation headers
+        - accept-ranges
+        - vary
+      - Response security headers
+        - Proxy-Authenticate
+        - Set-Cookie
+        - WWW-Authenticate
+    - Entity headers
+      - describe body size and contents, or resource itself
+      - Include:
+        - Allow
+        - Location
+      - Content Headers
+        - Content-Base
+        - Content-Encoding
+        - Content-Language
+        - Content-Length
+        - Content-Location
+        - Content-MD5
+        - Content-Range
+        - Content-Type
+      - Entity caching headers
+        - ETag
+        - Expires
+        - Last-Modified
+    - Extension headers
+      - new headers not in the spec
+      - allow developers to extend capabilities of HTTP services to properly manage their resources.
+  - Header syntax
+    - name: value
+    - can be made more readable by breaking them into multiple lines, preceding each extra line with space or tab.
+- Entity body
+  - payload of the HTTP messages
+  - can carry many types of digital data:  
+
+## Connection Management
