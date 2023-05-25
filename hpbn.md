@@ -1153,3 +1153,217 @@ ref:`High Performance Browser Networking`
   - can carry many types of digital data:  
 
 ## Connection Management
+
+- TCP connections
+  - TCP gives HTTP a reliable bit pipe.
+- TCP streams are segmented and shipped by IP packets.
+- Each IP packet contains
+  - An IP packet header(20 bytes)
+    - source and destination IP addresses
+    - size
+    - other flags
+  - A TCP segment header(20 bytes)
+    - TCP port numbers
+    - TCP control flags
+    - numeric values used for data ordering and integrity checking.
+  - A chunk of TCP data
+- Keeping TCP connections straight.
+  - TCP keeps the many connections open straight using port numbers.
+  - IP addresses get you to the right computer, port numbers get you to the right application.
+  - TCP connection
+    - <source-IP-address, source-port, destination-IP-address, destination-port>
+    - these 4 values uniquely define a connection.
+    - No two connections can have the same value for al four but can for some of the components
+- Programming with TCP sockets
+  - interfaces provided by the socket API
+  - socket API hides all the details of TCP and IP from the HTTP programmer.
+  - Include
+    - s = socket(<parameters>)
+    - bind(s, <local IP:port>)
+    - connect(s, <remote IP:port>)
+    - listen(s, ...)
+    - s2 = accept(s)
+    - n = read/write(s, buffer, n)
+    - close(s)
+    - shutdown(s, <side>)
+  - socket API lets you create TCP endpoint data structures, connect these endpoints to remote server TCP endpoints, and read and write data streams.
+  - TCP API hides all the details of the underlying network protocol handshaking, segmentation and reassembly of the TCP data stream to and from IP packets.
+- HTTP performance relies heavily on the performance of TCP plumbing.
+  - TCP performance considerations
+    - HTTP transaction delays
+  - Performance focus areas
+    - TCP connection setup handshake.
+    - TCP slow-start congestion control
+    - Nagles algorithm for data aggregation.
+      - RFC 896.
+      - check TCP_NODELAY
+    - TCP's delayed acknowledgement algorithm for piggybacked acknowledgements
+      - TCP impelements this by holding outgoing acks in a buffer for a certain window of time(100-200) looking for an outgoing message to piggyback on, if none, send as own packet.
+      - check if its adjustable via OS as can introduce significant delays
+    - TIME_WAIT delays and port exhaustion.
+      - control block of ip address and port number introduced and held for 2wice maximum segment lifetime.
+      - source ports: 60,000
+      - operating systems can slow down significantly when there are multiple open connections and control blocks.
+- HTTP connection handling
+  - Connection Header
+    - can carry 3 different types of tokens
+      - HTTP header field names, listing headers relevant only to that connection
+      - Arbitrary token values, describing non-standard options for this connection
+      - value close, indicating persistent connection will be closed when done.
+    - after HTTP app receives connection with HTTP header, it parses it, applies all options then deletes header, before forwarding to the next hop.
+    - placing hop-by-hop header name in connection header is called protecting the header.
+  - Serial transaction delays.
+    - solvable using
+      - parallel connections
+      - persistent connections
+        - dumb proxy keep alive.
+      - pipelined connections
+      - multiplexed connections
+  - Mysteries of Connection Close
+    - at will disconnection
+    - content length and truncation
+    - connection close tolerance, retries and idempotency.
+    - graceful connection close.
+      - full and half closes
+      - TCP close and reset errors
+      - graceful close.
+
+## Web Servers
+
+- Web server processes HTTP requests and serves responses, an either be software or hardware.
+- Web server implementations
+  - They implement HTTP and related TCP connection handling.
+  - They also manage the resources served by the web server and provide administrative features to configure, control and enhance the web server.
+  - Web server logic implements the HTTP protocol, manages web resources and provides web server administrative responsibilities.
+  - Web server logic shares responsibility for managing TCP connections with the operating system.
+  - OS manages h/w details of the underlying computer system and provides TCP/IP network support, filesystems to hold web resources and process management to control current computing activities.
+- Types:
+  - General purpose s/w web servers
+    - run on standard, network-enabled computer systems.
+    - Apache, Ms web servers.
+  - Web server appliances
+    - prepackages software/hardware solutions.
+    - IBM whistle, Toshiba Magnia.
+  - Embedded Web servers
+    - tiny web servers intended to be embedded into consumer products
+- What Real Web servers do:
+  - Set up connection - accept a client connection or close it if unwanted.
+    - Handle New connections
+    - Client hostname identification
+      - reverse DNS.
+    - Determining client user using ident.
+      - ident allows servers to find out what username initiated the connection.
+      - port 113.
+  - Receive request - read a HTTP message from the network.
+    - parses out the pieces of the request message.
+    - internal representations of messages via custom data structures that make it easy to manipulate...i.e pointer and length of message
+    - connection input/output processing architectures.
+      - single threaded web servers.
+      - multiprocess and multithreaded web servers.
+      - multiplexed I/O servers.
+      - multiplexed multithreaded web servers.
+  - Process request - interpret request message and take action
+  - Access resource - access resource specified in the message.
+    - docroots
+    - virtually hosted docroots
+    - user home directory docroots.
+    - directory listings
+    - dynamic content resource mapping, application servers., cgi(server-side apps)
+    - server-side includes(SSI)
+    - access controls.
+  - Construct response - create the HTTP response message with the right headers.
+    - response entities
+    - MIME typing
+      - mime.types
+      - magic typing
+      - explicit typing
+      - type negotiation
+    - redirection
+      - permanently moved resources
+      - temporarily moved resources
+      - URL augmentation
+      - Load balancing
+      - Server affinity
+      - Canonicalizing directory names
+  - Send response - send response back to the client.
+  - Log trasnaction - places notes about the completed transaction in a log file. 
+
+## Proxies
+
+- Sit between clients and servers and act as middlemen shuffling packets back and forth between them.
+- With a web proxy, client talks instead to it, which itself talks to the server on the client's behalf.
+- HTTP proxy servers are both web servers and web clients, as they do both send and receive requests just like a web server.
+- Private and Shared proxies
+  - a proxy server can either be dedicated or shared among many clients, private and public.
+  - common caching in public proxy.
+  - private proxy on client computer to extend browser functionality.
+- Proxies vs Gateways
+  - proxies connect two or more apps that speak same protocol while gateways do so for different protocols.
+  - gateway acts as a protocol converter, allowing a client to complete a transaction with a server on a different protocol.
+  - commercial proxy servers almost always implement gateway functionality.
+- Why use them?
+  - provide many useful value-add web services
+    - child filter.
+    - document access controller
+    - security firewall
+    - web cache
+    - surrogate or reverse proxy or server accelerators
+    - content routers(netflix)
+    - transcoding
+    - anonymizer
+- Where do they sit?
+  - Proxy server deployment
+    - Egress proxy
+      - stick them at the exit points of local networks and larger internet.
+    - Access/Ingress proxy
+      - at ISP access points.
+    - Surrogates
+      - in front of web servers, where they can field all requests to it and only ask for resources when necessary.
+      - assume name and IP address of the web server, so all requests go to it instead of server.
+    - Network exchange proxy
+      - internet peering exchange points between networks
+  - Proxy Hierarchies
+    - message passed form proxy to proxy until they eventually reach the origin server and then passed back via the proxies to the client.
+    - proxies in a hierarchy are assigned parent and child relationships.
+    - next inbound proxy is parent and next outbound is child.
+    - Proxy hierarchy content routing
+      - hierarchies are not static
+      - can be dynamic in relation to
+        - load balancing
+        - geographic proximity routing
+        - protocol/type routing
+        - subscription based routing
+- How proxies get traffic?
+  - Modify the client
+    - configure on the client side that it needs to use a proxy server.
+  - Modify the network
+    - net infra intercepts and steers web traffic into a proxy without client knowledge or participation
+  - Modify the DNS namespace
+    - manual editing or using special dynamic DNS servers that compute the appropriate proxy or server on demand.
+  - Modify the web server
+    - HTTP redirection command.
+- Client proxy settings
+  - Manual configuration
+  - Browser preconfiguration
+  - Proxy auto-configuration
+    - small js programs that compute proxy settings on the fly
+    - mime type = application/x-ns-proxy-autoconfig
+  - WPAD proxy discovery
+    - Web Proxy Autodiscovery Protocol
+    - uses a series of resource-discovery techniques to determine proper PAC file.
+      - DHCP
+      - Service location protocol
+      - DNS well known hostnames
+      - DNS SRV records
+      - DNS URIs in txt records
+- Tricky things about proxy requests
+  - proxy URI differ from server URIs
+    - partial URI for server, full URI for proxy.
+  - intercepting proxies get partial URIs
+  - in-flight URI modifications
+  - URI client-auto expansion and hostname resolution
+    - URI reslution without a proxy
+    - URI resolution with an explicit proxy
+    - URI resolution with an intercepting proxy
+
+### Tracing Messages
