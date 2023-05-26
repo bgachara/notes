@@ -1367,3 +1367,143 @@ ref:`High Performance Browser Networking`
     - URI resolution with an intercepting proxy
 
 ### Tracing Messages
+
+- You need to be able to trace the flow of messages across proxies and to detect any problems, just as it is important to trace the flow of IP packets across different switches and routers.
+- The Via Header
+  - lists information about each intermediate node through which a message passes.
+  - each time a message goes through another node, the intermediate node must be added to the end of the Via list.
+  - used to track forwarding of messages, diagnose message loops and identify the capabilities of all senders along the request/response chain.
+  - proxies can also use this to detect routing loops in the network.
+  - both request and response messages have Via headers.
+  - Via header also record protocol conversions as some proxies support gateway functionality.
+- The TRACE method
+  - useful method for debugging proxy flows
+  - max forwards.
+- Proxy Authentication
+  - HTTP provides for proxy authentication, blocks request for content until user provides valid access-permission credentials to the proxy.
+- Proxy interoperability
+  - Handling unsupported headers and methods
+    - OPTIONS methods allows discover the supported functionality.
+    - Allow header. 
+
+## Caching
+
+- Web caches are HTTP devices that automatically keep copies of popular documents.
+- Caches benefits:
+  - Reduce redundant data transfers
+  - Reduce network bottlenecks
+  - Reduce demand on origin servers.
+  - Reduce distance delays
+  
+- Redundant data transfers
+- eat up expensive data bandwidth, slow down transfers and overload web servers.
+- Bandwidth bottlenecks
+  - clients access services at the speed of the lowest network on the way.
+  - bandwidth causes noticeable delays for larger documents and speed difference between network types is dramatic.
+- Flash crowds
+  - when an event causes many people to access a web document at nearly the same time.
+- Hits and Misses
+- Revalidations
+  - caches have to check now and then that their copies are still up-to-date with the server, HTTP revalidations
+  - to make them efficient, HTTP defines special requests that can quickly check if contents are fresh without getting the whole object from the server.
+  - a cache can revalidate a copy as many times it wants but due to network constraints and size of it, only do it for requested objects or when its old enough to warrant a check.
+  - revalidate hit or slow hit, when cache sends a small revalidation request to origin server and gets a 304 Not modified response.. cache marks it as temporary fresh again.
+  - slow hit is slower than pure cache hit due to check but faster than cache miss.
+  - If-Modified-Since header, when added to a GET request, tells server to only add it if object has been modified since last time copy was cached.
+  - Types
+    - Revalidate Hit
+    - Revalidate Miss
+    - Object deleted.
+- Hit Rate
+  - fraction of requests that are served from cacheis called cache hit rate.
+  - often described as a precentage.
+  - depends on
+    - how big your cache is
+    - how similar interests of the cache users are
+    - how frequently data is changing
+    - how cache itself is configured.
+  - Hit rate is notoriously difficult to predict.
+- Byte Hit Rate
+  - Represents the fraction of all bytes transferred that were served from the cache.
+  - captures the degree of traffic savings
+- Distinguishing Hits and Misses
+  - HTTP provides no way for a client to tell if a response was a cache hit or an origin server access.
+  - one way is use the data header
+- Cache topologies
+  - public vs private caches
+    - most web browsers have private caches on memory of your pc and allow you to configure cache sizes and settings.
+    - proxy caches are public and have cahnce to do away with redundant traffic as its serving many clients.
+    - proxy cache follow rules of proxy..manual or automatic.
+  - Proxy cache hierarchies
+    - idea is to use smaller, inexpensive caches near the clients and progrssively larger more powerful one up the hierarchy to hold documents shared by many users.
+- Cache meshes, content routing and peering
+  - some proxy caches can be described as content routers as they make routing decisions about how to access, manage and deliver content.
+  - cache proxies on cache meshes make dyncamic cache communication decisions.
+    - select between parent cache and origin server dynamically.
+    - select particular parent cache dynamically
+    - search caches in the local area before going to parent cache.
+    - allow or block internet transit via cache.
+  - sibling caches
+- Cache processing steps
+  - modern commercial proxies are quite complex as they are built to be high-performant and support advances HTTP features.
+  - Common steps:
+    - Receiving - cache reads arriving request message from the network.
+      - High-performance caches read from multiple connections and start processing transaction before entire message has arrived.
+    - Parsing - cache parses message, extract headers and URL.
+      - parses and places header parts into easy-to-manipulate data structures.
+      - also responsible for normalizing headers
+    - Lookup - cache checks if local copy is available, if not, fetches it and stores it locally
+      - use fast algorithms to determine whether an object is available in local cache.
+      - cached object contains server response body and original server response headers so they can be returned by cache hit.
+      - cached object also contains metadata.
+    - Freshness check - checks if cached copy is fresh, if not, request a new one.
+    - Response creation - creates response message with new headers and cached body.
+      - Cache uses the cached server response headers as the starting point for the response and then modifies and augment the base headers.
+      - Cache is responsible for adapting headers to match the client
+    - Sending
+    - Logging
+      - most cache keep log files and statistics about cache usage.
+- Keeping copies fresh
+  - cached data needs to maintain some consistency with the server data.
+  - HTTP uses document expiration and server revalidation
+  - Document expiration 
+    - lets an origin server attach an expiration data using special HTTP Cache-control and Expires headers.
+    - cacn server this content until client explicitly requests object from server and not cache.
+    - cache-control uses relative time(seconds) instead of absolute time
+  - Server revalidation
+    - check with server when object expires.
+    - revalidation with conditional methods
+      - if-modified-since - used in conjuction with last-modified
+        - has some situations where it falls short
+      - if-none-match - entity tag revalidation
+        - publisher changes this on document edit
+    - weak and strong validators
+      - last-modified and entity tag are cache validators
+      - strong change anytime the document changes
+      - weak changes when significant meaning of the document changes.
+- Controlling cachability
+  - No-cache and no-store response headers
+    - response marker no-sore forbids caching
+    - response no-cache can be stored but not served to the client without revalidation.
+  - Max-Age response headers
+  - expires response headers
+    - deprecated
+  - Must-revalidate response headers
+    - cannot server a stale copy without first revalidating with origin server
+  - Heuristic expiration
+    - LM-factor algorithm
+  - Client freshness constraints
+    - clients use cache control headers to tighten or loosen expiration constraints.
+- Setting Cache controls
+  - control HTMl caching via http-equiv
+    - defines http headers that should be associated with the document
+- Cache freshness algorithms
+  - age and freshness lifetime.
+    - age < freshness lifetime
+    - age is total time since response was issued from the server(or revalidated)
+    - freshness is how old it can get before expiry
+- Caches and advertising
+  - advertiser's dilemna vs publisher's response.
+- Hit metering and usage limiting
+
+## Integration points: Gateways, Tunnels and Relays
