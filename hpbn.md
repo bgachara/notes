@@ -1507,3 +1507,48 @@ ref:`High Performance Browser Networking`
 - Hit metering and usage limiting
 
 ## Integration points: Gateways, Tunnels and Relays
+
+- HTTP is used as protocol for all web resources and also is a protocol that other applications and application protocols make use to get their job done.
+- Gateways
+  - this is the glue between resources and applications, app asks via HTTP or some other defined interface a gateway to handle a request and it can provide a response.
+  - gateway can speak the query language to the database or generate dynamic content, acting like a portal.
+  - some automatically translate HTTP into other protocols
+  - Client side and Server side gateways
+    - <client-protocol>/<server-protocol>
+    - */HTTP or HTTP/*
+  - Protocol gateways
+    - you can direct HTTP traffic to gateways just like you do to proxies.
+    - http/https server side security gateways
+    - https/http client side accelerator gateways
+  - Resource gateways
+    - application server combines the destination server and gateway into a single server
+    - app servers are server-side gateways that speak HTTP with the client and connect to an application program on the server side.
+    - CGI - first popular API for application gateways, common gateway interface.
+    - CGI is a standardized set of interfaces that web servers use in response to HTTP requests for special URLs, collect the program output, send it back in HTTP responses
+    - Fast CGI developed to get over original CGI issues i.e spawning a new process..keeps a persistent daemon.
+    - Server extension APIs
+      - allow programmers to graft their own code and completely replace pieces of the server
+  - Application interfaces and Web services
+    - web services 
+      - set of standards and protocols that allow web applications to talk to each other.
+      - exchange info over XML and SOAP(simple object access protocol) aka adding xml to http.
+- Tunnels
+  - let you send non-HTTP traffic via HTTP connections, allowing other protocols to piggyback off HTTP.
+  - establish HTTP tunnels using CONNECT
+    - HTTP CONNECT establishes tunnels
+  - data tunneling, timing and connection management
+  - SSL tunneling
+    - tunnels first developed to carry encrypted SSL traffic through firewalls
+    - many orgs funnels data via packet-filtering and proxy-servers to enhance security.
+    - SSL cannot be proxied by traditional proxy servers as information is encrypted.
+  - SSL tunneling vs HTTP/HTTPS Gateways
+    - https can be gatewayed as other protocols, having the gateway initiate the SSL session with the remote HTTPS server and then perform HTTPS transaction onthe clients part.
+    - response will be received and decrypted by the proxy and sent to the client over insecure http
+    - no need for SSL on the proxy.
+  - Tunnels authentication
+    - security considerations
+      - tunnels gateway cannot verify that the protocol being spoken is really what is supposed to be tunneled
+- Relays
+  - simple HTTP proxies that do not fully adhere to the HTTP specification
+  - process enough HTTP to establish connections, then blindly forward bytes.
+  - used for simple filtering, diagnostics or content transformations
