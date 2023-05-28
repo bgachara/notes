@@ -7,12 +7,16 @@ Ref:
 `Rust Book`
 `Rust for Rustaceans`
 `Rust 101 - www.ralfj.de`
-
+`Rust Training - learn.microsoft`
 
 ## General Features
 
 - Inherent memory safety of the language.
-- Manual management of memory.
+- Memory Safe: Manual management of memory, all pointer/references always point to valid memory.
+- Type safe: compiler assures that no operation will be applied to a variable of the wrong type. 
+- Data race free: guarantees thread safety by ensuring no two can mutate same value at the same time.
+- Zero-cost abstractions: abstractions provided by the language don't have any performance costs.
+- Minimal runtime: no garbage collector hance minimal and optional runtime.
 - On par performance with c and cpp.
 - General purpose language that can fall into any domain.
 - 178 different built-in architecture compilation targets.
@@ -30,6 +34,10 @@ Ref:
     - manages rust version, installs compiler, cargo, std lib and other core tools.
     - determines toolcahin depending on the host platform.
     - It is a tool multiplexer as it installs and manages toolchains.
+    - there are two ABIs in use in windows
+        - Msvc abi by vs, provides best interop with other Windows s/w.
+        - GNU ABI by GCC.
+        - controlled by `rustup set-default host xxxx`, `rustup toolchain install stable-gnu`
 
 - **cargo** 
     - official build and dependency management tool during development.
