@@ -949,8 +949,329 @@ ref:`High Performance Browser Networking`
   
 ## Browser APIs and Protocols
 
---- skip this kidogo ---
+### XMLHTTPRequest
 
+- also referred to as XHR.
+- this is a browser level API that enables the client to script data transfers via Js.
+- made its debut in IE in AJAX.
+- XHR enabled fetching of state updates asynchronously and under full control of the application Js code.
+- XHR enabled us to make the leap from building pages to building interactive web applications in the browser.
+- XHR is an application API provided by the browser, meaning the browser takes care
+  - manages connection establishment, pooling and termination
+  - determines the best HTTP(S) transport
+  - handles HTTP caching, redirects and content-type negotiation
+  - enforces security, authentication and privacy constraints
+  - formatting HTTP requests.
+- This enabled also every networking use case to take advantage of it, scripted donwloads, uploads, streaming and real-time notifications.
+- Applications can focus on initiating requests, managing their progress and processing returned data from the server.
+
+### CORS
+
+- XHR interface enforces strict HTTP semantics on each request, application supplies the data and URL and the brpwser formats the request and handles the full lifecycle of each connection.
+- Even though application can add custom header with setRequestHeader(), there are a number that are off limits, protected headers.
+- Protecting the origin headeris esp important as it is the key piece of the same-origin policy applied to all XHR requests.
+- Origin is the triple of application protocol, domain name and port number.
+- Cross Origin Resource Sharing provides a secure opt-in mechanism for client-side cross-origin requests.
+- The opt-in authentication mechanism for the CORS request is handled at a lower layer: when request is made, browser automatically appends the protected Origin HTTP header,
+  which advertises the origin from where the request is made.
+- Remote server is then able to examine the Origin header and decide whether to allow request by returning an Access-Control-Allow-Origin header
+- If not CORS aware, client request will fail.
+- CORS takes a number of additional security precautions
+  - CORS requests omit user credentials such as cookies and HTTP authentication.
+  - Client is limited to issuing simple cross-origin requests which restricts both the methods allowed and access to HTTP headers that can be sent and read by the XHR.
+- To enable cookies and HTTP authentication, client must set and extra property(withCredentials) on the XHR object and server must respond with an appropriate header to indicate
+  that it is knowingly allowing application to include private user data.
+- Client must send a pre-flight request if it needs to write or read custom HTTP headers or wants to use a non-simple method.
+
+### Downloading data with XHR
+
+- XHR can transfer both text-based and binary data.
+- Browser offers automatic encoding and decoding for a variety of native data types, allowing application to pass these types directly to XHR to be properly encoded.
+- Types:
+  - ArrayBuffer
+  - Blob
+  - Document
+  - JSON
+  - Text
+
+### Uploading data with XHR
+
+- Pass in a data object when calling send() on the XHR request.
+- send() method accepts one of DOMstring, Document, FormData, Blob, File or ArrayBuffer objects, automatically performs the appropriate encoding, sets the appropriate HTTP content-type,
+  and dispatches the requests.
+- Monitoring upload and download progress 
+  - XHR provides APIs to monitor progress events
+    - loadstart
+    - progress
+    - error
+    - abort
+    - load
+    - loadend
+
+### Streaming data with XHR
+
+- In some cases an application may need or want to process a stream of data incrementally, upload data to the server as it becomes available or process downloaded data.
+- Send() expects full payload
+- Lack of streaming as a first class use case is a well recognized limitation
+- *look into Streams API*
+
+### Real-time notifications and delivery
+
+- XHR enables a simple and efficient way to synchronize client updates with the server, request is dispatched by client to server to update appropriate data
+- What about the reverse??
+- Client has to poll the server for updates
+- Polling is simple to implement but very ineffective, choice of polling intervals is critical, long = delays, short = traffic congestion
+- Average message latency delay??
+- Overhead of polling??
+- Long Polling with XHR 
+  - instead of returning an empty response, keep connection idle until update is available.
+  - reduces number of requests and offers best case scenario for message latency.
+  
+## Fetch API
+
+--- this will go here ---
+
+## Server-Side Events
+
+- SSE enables efficient server-to-client streaming of text-based event data: real-time notifications or updates geenrated by the server.
+- SSE introduces new two components
+  - a new EventSource interface in the browser which allows the client to receive push notifications from the server as DOM events
+  - event stream data format, which is used to deliver the individual phases.
+- Combination of these two is what makes SSE both an efficient and indispensable tool for handling real-time data in the browser.
+  - Low latency delivery via single, long-lived connection
+  - Efficient message parsing with no unbounded buffers.
+  - Automatic tracking of last seen message and auto reconnect
+  - Client message notifications as DOM events
+- Under the hood, SSE provides an efficient, cross-browser impelementation of XHR streaming: actual delivery of the messages is done over a single long-lived HTTP connections.
+
+### EventSource API
+
+- The eventsource interface abstracts all the low-level connection establishment and message parsing behind a simple browser API.
+- TO start; we need to specify the URL of the SSE event stream resource and register apporpriate Js event listeners on the object
+- SSE provides a memory efficient implementation of XHR streaming, unlike a raw XHR which buffers full rceived response, SSE can discard them without accumulating all of them in memory.
+- This API also provides auto-reconnect and tracking of last seen message.
+
+### Event Stream protocol
+
+- An SSE event stream is delivered as a streaming HTTP response, client initiates a regular HTTP request and server responds with a custom "text/stream" content-type and then streams the UTF-8 encoded event data 
+- Event-stream protocol is trivial to understand and implement
+  - Event payload is the value of one or more adjacent data fields.
+  - Event may carry an optional ID and event type string
+  - Event boundaries are marked by newlines.
+- All event source data is UTF-8 encoded.
+- SSE was specifically designed as a simple,efficient,server-to-client transport for text based data.
+- For binary data, Websockets is the right tool for the job.
+
+## WebSocket
+
+- Enables bidrectional, message-oriented streaming of text and binary data between a client and server.
+- It is the closest API to a raw network socket in the browser, except browser provides a simple API abstracting all the complexity
+- Also provides:
+  - Connection negotiation and same origin policy enforcement.
+  - Interoperability with existing HTTP infrastructure.
+  - Message-oriented communication and efficient message framing
+  - Subprotocol negotiation and extensibility.
+- This is the one of the most versatile and flexible transports available in the browser.
+
+### Websocket API
+
+- To initiate a new connection, we need the URL of a websocket resource and a few application callbacks.
+- Sample steps
+  - Open a new secure WSS connection
+  - Optional callbacks, error, termination, success
+  - Client initiated message to the server.
+  - A callback function invoked for every message from the server.
+  - invoke binary or text processing logic for the received message.
+
+### WSS and WS url schemes
+
+- uses custom scheme, ws for plain-text communication and wss for secure.
+
+### Receiving text and Binary data
+
+- Websocket communication consists of messages and application code does not need to worry about buffering, parsing and reconstructing received data.
+- onmessage called when all the data is available.
+- internally protocol only tracks tow pieces of information about the message, length of the payload as a variable-length field and the type of payload to distinguish UTF-8 from binary transfers.
+- onmessage. DOMString for text-based data and Blob object for binary data.
+- a blob object represents a file-object of immutable raw data, if you don't need to modify it, keep it as is, otherwise use ArrayBuffer.
+
+### Sending Text and Binary Data
+
+- ws offers a bidirectional communication channel which offers message delivery in both directions over the same connection.
+- can socket.send(text, json, arraybuffer, arraybufferview, blob as binary)
+- send() is aynchronous
+- can query bufferedAmount attribute on the socket.
+
+### Subcontrol Negotiation
+
+- No equivalent mechanism like HTTP headers for communicating additional information as such client and server must agree to implement their own subprotocol to communicate this data.
+- For this ws provides a simple and convenient subprotocol negotiation API.
+- if subprotocol negotiation is successful, then the onopen callback is fired on the object and application can query the protocol attribute on the websocket object to determine the chosen protocol.
+
+### Websocket API
+
+- consists of two high-level components: opening HTTP handshake used to negotiate parameters of connection and a binary message framing mechanism to allow for low overhead, message-oriented delivery
+- Websocket protocol is a fully functional, standalone protocol that can be used outside the browser although its main application is in browser-based applications 
+- Binary Framing Layer
+  - ws uses a custom binary framing format, which splits each application message into one or more frames, transports, reassembles them and notifies receiver.
+  - websoket frame: 2-14 bytes+payload.
+  - payload of all client initiated frames is masked using the value specified in the frame header, prevents cache poisoning attacks on the clients' intermediaries that dont understand ws.
+
+### Protocol Extensions
+
+- Ws specification allows for protocol extensions: the wire format and the semantics of the ws protocol can be extended with new opcodes and data fields.
+- allows client adn server to implement additionally functionality without on top of the base Websocket framing layer without requiring any intervention or cooperation from application code.
+- Extension examples
+  - A multiplexing extension for websockets
+    - provides a way for separate logical ws connections to share an underlying transport connection
+    - addition of channel ID
+  - Compression extensions for websocket
+    - framework for creating ws extensions that add compression functionality to the ws protocol
+
+### HTTP Upgrade Negotiation
+
+- To enable one or more extensions, client must advertise them in the initial upgrade handshake and the server must ack the extensions that will be used for the lifetime of the negotiated connections
+- leverages HTTP to perform the handshake offers several advantages i.e makes them compatible wiht existing HTTP infra'
+- ws servers can run on port 80 and 443.
+- extend and reuse the HTTP upgrade with custom ws headers.
+  - Sec-websocket-version
+  - sec-websocket-key
+  - sec-websocket-accept
+  - sec-websocket-protocol
+  - sec-websocket-extensions
+- ws connections subject to the same-origin policy.
+
+### WS use cases and performance
+
+- Request and Response streaming
+- Message overhead
+- Data efficiency and compression
+- Custom application protocols
+- Deploying Websockets Infrastructure
+
+
+## WebRTC
+
+- collection of standards, protocols and Js APIs, the combination of which enables peer-to-peer audio, video and data sharing between browsers(peers).
+- turns real-time communication into a standard feature that any web application can leverage via a simple Js API.
+- Primary APIs
+  - MediaStream: acquisition of audio and video streams
+  - RTCPeerConnection: communication of audio and video data
+  - RTCDataChannel: communication of arbitrary application data.
+- WebRTC transports its data over UDP.
+- primary purpose is enable real-time communication between browsers and its also designed such that it can be integrated with existing communication systems: VOIP, SIP clients and PSTN
+- WebRTC is also about bringing all the capabilities of the web to the telecommunications world.
+
+### Audio and Video Engines
+
+- requires the browser access the system hardware to capture both audio and video via a simple and conssitent API.
+- raw audio and video streams are not sufficient on their own, each stream processed to enhance quality,synchronized and output bitrate adjust to bandwidth and latency between clients.
+- capturing and processing audio and video is a complex problem
+  - Internal WebRTC API - Voice engine and Audion Engine
+  - Audio Engine - Audio codecs, jitter/packet loss concealement, echo cancellation, noise reduction
+  - Video Engine - Video codecs, jitter/packet loss concealement, synchronization, image enhancement
+- Acquiring audio and video streams with getUserMedia
+  - MediaStream object enables application to request audio and video streams as well as a set of APIs to manipulate and process the acquired media streams.
+  - The mediastream object consists of one or more individual tracks.
+  - Tracks within it are synchronized.
+  - Input source can be a physical device; microphone, webcam, local or remote file.
+  - Output stream can be sent to one or more destinations; local video or audio element, js code for post-processing or a remote peer.
+  - all audio and video processing is handled automatically by audio and video engines.
+  - getusermedia() is responsible for requesting access to the microphone and camera from the user and acquiring those that match the specified constraints
+  - Audio(OPUS) and Video(VP8) Bitrates.
+
+### Realtime Network Transports
+
+- Audio and Video streaming apps are designed to tolerate intermittent packet loss, audio and video codecs can fill in small data gaps, often with minimal impact on the output quality
+- Applications must implement their own logic to recover from lost or delayed packets carrying other types of application data.
+- Timeliness and low latency can be more important than reliability 
+- Thus preferrance for UDP over TCP for realtime data delivery.
+- WebRTC uses UDP at the transport layer.
+- WebRTC also requires a large suporting cast of protocols 
+  - ICE: TURN and STUN
+  - SDP - session description protocol
+  - DTLS - datagram transport layer security
+  - SCTP - stream control transport protocol
+  - SRTP - secure real-time transport protocol
+- ICE, TUNR, STUN are necessary to establish and maintain a peer-to-peer connection over UDP
+- DLTS is used to secure all data transfers between peers, encryption is a mandatory feature of WebRTC.
+- SCTP and SRTP are the application protocols used to multiplex the different streams, provide congestion and flow control and provide partially reliable delivery and other additional services over UDP.
+
+### RTCPeerConnection API
+
+- responsible for managing the full lifecyle of each peer-to-peer connection.
+- manages
+  - full ICE workflow for NAT traversal.
+  - sends automatic(STUN) keepalive between peers.
+  - keeps track of local streams.
+  - keeps track of remote streams.
+  - triggers automatic stream renegotiation as required.
+  - provides APIs to generate the connection offer, accept the answer, allows us to query the connection for its current state
+- Establishing a peer-to-peer connection
+- Signaling and session negotiation
+  - WebRTC defers the choice of signaling transport and protocol to the application, allowing for interoperability with a variety of signaling protocols powering existing communications infrastructure.
+  - Session Initiation Protocol(SIP)
+    - VoIP
+  - Jingle
+    - signaling extension for the XMPP protocol used for session control
+  - ISDN User Part(ISUP)
+    - used for setup of phonecalls in many PSTN
+  - Custom signaling channel
+    - skype uses one of this.
+  - Look into Asterisk popular for communication needs across businesses and large carriers
+- Session Description Protocol
+  - used to describe the parameters of the peer-to-peer connection.
+  - does not deliver any media itself used to describe the session profile(types of media to be exchanged,network transports, used codecs, bandwidth information, other metadata)
+  - JavascriptSessionEstablishmentProtocol(JSEP) abstracts all the inner workings of SDP behind a few simple method calls on the RTCPeerConnection object.
+- Interactive Connectivity Establishment
+  - each RTCPeerConnection object contains an "ICE agent"
+  - the primary goal for the ICE agent is to identify a viable routing path between the peers, however it doesnt stop there, periodically checks other candidates to see if it can deliver better performance via an alternate route
+    - ICE agent is responsible for gathering local IP, port tuples(candidates)
+    - ICE agent is responsible for performing connectivity checks between peers.
+    - ICE agent is responsible for sending connection keepalive.
+  - Incremental provisioning(Trickle ICE)
+    - extension to the ICE protocol that allows incremental  gathering and connectivity checks between the peers.
+    - relies on the signaling channel as they are discovered.
+  - Tracking connectivity status and ICE gathering
+    - a successful connection is one that is able to establish connectivity for all requested streams
+
+### Delivering Media and Application Data
+
+- Other protocols fill in the gaps left by the UDP connection
+  - DTLS 
+    - used to negotiate the secret keys for encrypted media data and for secure transport of application data.
+    - WebRTC would use TLS for this but it cant be used over UDP as it relies on reliable and in-order delivery offered by TCP
+    - DTLS is TLS for UDP.
+    - extends the base TLS record protocol by adding an explicit fragment offset and sequence number for each handshake record allowing large records to be fragmented across packet and reassembled by the other peer.  
+  - SRTP 
+    - used to transport audio and video streams
+    - defines a standard packet format for delivering audio and video over IP networks.
+    - provides all the essential information required by the media engine for real-time playback of the stream.
+  - SCTP 
+    - used to transport application data.     
+    - responsible for how the individual SRTP packets are delivered, by implementing a separate, out-of-band feedback channel for each media stream.
+    - tracks all statistics related to delivery of packets.
+    - provides the best features of TCP and UDP.
+    - Concepts
+      - Association
+      - Stream
+      - Message
+      - Chunk
+
+### Data Channel
+
+- enables bidirectional exchange of arbitrary application data between peers, think Websocket, but peer-to-peer and with customizable delivery properties of the underlying transport.
+- mirrors websockets with some minor differences
+  - datachannel is a factory method on the RTCPeerConnection object
+  - either peer can initiate a new datachannel session.
+  - each datachannel can be configured with custom delivery and reliability semantics.
+- setup and negotiation
+- configuring message order and reliability
+  - allows us to customize the delivery semantics of each channel to match the requirements of the application and the type of data being transferred.
+    - in-order or out-order delivery of messages
+    - reliable or partial reliable delivery of message
+      - partial reliable delivery with retransmit
+      - partial reliable delivery with timeout
 
 ## HTTP AGAIN!!!
 
