@@ -52,11 +52,11 @@
 ## Advantages of learning Assembly Language
 
 - Better understanding of Architecture Issues
-      - basic instruction set.
-      - processor registers
-      - memory addressing modes.
-      - hardware interfacing
-      - input / output
+  - basic instruction set.
+  - processor registers
+  - memory addressing modes.
+  - hardware interfacing
+  - input / output
 
 - Understanding Toolchain
       - process of taking code written and converting it to machine executable format.
