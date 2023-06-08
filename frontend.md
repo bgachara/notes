@@ -61,3 +61,44 @@
 - useState, useReducer, useMemo, useCallback, useEffect, useRef
 - Context and Custom hooks.
 - Libraries: Zustand, Valtio, Jotai
+
+## Source Maps
+
+- Provides a way of mapping code within a compressed file back to its original position in a source file.
+- Undos the from Module -> Compiler -> Assets process.
+- Browsers parse it to give back an almost accurate representation of the code, i.e debugging, stack traces.
+- Not automatically donwloaded or included with web pages.
+- Transpilation too.
+- Base64 VLQ
+    - Optimized to make it easier to have mapping between big numbers and corresponding information in source maps.
+    - A line of code is represented in a series of segments
+        
+## Patterns for Web Apps
+
+- Routing
+  - Server
+  - Client
+  - Hybrid
+- Rendering
+  - Client-side
+  - SSR(streaming, async, shell)
+  - Static
+- Hydration
+  - Eager
+  - Full
+  - Replayable
+  - Progressive
+  - Load, Bundle/Serialize, Execute on load
+
+## Computational Caching
+
+- Pure Functions
+    - for a given set of parameters they always return the same value
+    - do not trigger side effects
+- Memoization
+    - result caching in process
+- Serialization and Hashing
+    - serialization: turning data into sth that can be stored.
+    - hashing: taking data and scrambling it.
+- Persistence
+    - saving to disk.

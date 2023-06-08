@@ -59,16 +59,16 @@
   - input / output
 
 - Understanding Toolchain
-      - process of taking code written and converting it to machine executable format.
-      - includes the compiler, assembler, linker, loader and debugger.
+  - process of taking code written and converting it to machine executable format.
+  - includes the compiler, assembler, linker, loader and debugger.
 
 - Improve algorithm development skills
-      - practice with a more explicit language hence better expression of ideas needed
+  - practice with a more explicit language hence better expression of ideas needed
 
 - Improve understanding of functions/ procedures
-      - understand how they work.
-      - contents and structure of the function call frame i.e activation record.
-      - understand recursive functions
+  - understand how they work.
+  - contents and structure of the function call frame i.e activation record.
+  - understand recursive functions
 
 - Understanding of I/O buffering
 
@@ -79,7 +79,7 @@
       - shared memory, threaded processing.
 
 - Introduction of Interrupt processing concepts.
-      - interrupt handling, interrupt service handling, vector interrupts.
+  - interrupt handling, interrupt service handling, vector interrupts.
 
 - Understanding how a compiler implements features of a high level language can aid in efficiency features selection.
 
