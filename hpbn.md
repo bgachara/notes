@@ -1873,3 +1873,108 @@ ref:`High Performance Browser Networking`
   - simple HTTP proxies that do not fully adhere to the HTTP specification
   - process enough HTTP to establish connections, then blindly forward bytes.
   - used for simple filtering, diagnostics or content transformations
+  
+## Web Robots
+
+- S/w programs that automate a series of web transactions without human interactions.
+- a.k.a web crawlers, bots, worms.
+- Web crawlers
+  - robots that recursively traverse information webs.
+  - have to give it a starting point, root set
+  - Root set grows over time and is the seed list for any fresh crawls.
+- Extracting links and normalizing relative links.
+  - as it retrieves HTML pages, needs to parse out the URL links in each page it retrieves and add them to crawl list.
+- Cycle avoidance
+  - as it crawls it must be careful not to get stuck in a loop.
+- Loops and Dups
+  - loops create duplicate content.
+- Trails of breadcrumbs
+  - because of huge number of URLs, you need data structures to keep track which URLs youve visited.
+  - ds need to be efficient in speed and memory.
+  - data structures used
+    - treees and hash tables
+    - lossy presence bitmaps
+    - chackpoints
+    - partitioning
+- Aliases and robot cycles
+  - aliases if URL look different but point to the same resource.
+- Canonicalizing URLs
+  - technique to remove obvious aliases by using a standard URL form
+- Filesystem link cycles
+  - reate an illusion of an infinitely deep directory hierarchy where none exists.
+- Dynamic virtual web spaces
+  - webmasters intentionally create sophisticated crawler loops to trap innocent unsuspecting robots.
+- Avoiding Loops and Dups
+  - canonicalizing URLs
+  - breadth-first crawling
+    - across many websites first as opposed to depth first, one website
+  - throttling
+  - limit URL sie
+  - URL/site blacklist
+  - pattern detections
+  - content fingerprinting
+    - use content in a page to compute checksum then compare it against any incoming crawls
+  - human monitoring
+
+### Robotic HTTP
+  
+- crawlers too need to abide by the rules of HTTP.
+- identifying request headers
+  - headers they implement include
+    - user-agent
+    - from
+    - accept
+    - referer
+- Virtual Hosting
+  - implementers also need to support the Host header
+- Conditional requests
+  - re-retrieve content only when it has changed
+- Response handling
+  - understand status codes
+  - entities
+- User-agent targeting
+  - optimize their content for web crawlers
+- Misbehaving robots
+  - runaway robots
+  - stale URLs
+  - long, wrong URLs
+  - nosy robots
+  - dynamic gateway access
+- Excluding robots
+  - use of a file called robots.txt, available on the server to guide the robots on where to go.
+  - file format, blank lines, comment lines and rule lines.
+  - HTML robot-control META tags.
+    - i.e <meta name="robots" content="noindex\nofollow">
+- Robot Etiquette
+  - martijn koster, wrote up list of guidelines for authors of web robots
+  - areas covered
+    - Identification
+    - Operations
+    - Limit yourself
+    - Tolerate loops and dups and other problems
+    - Scalability
+    - Reliability
+    - Public relations
+
+### Search Engines
+
+- make heavy use of full-text indexes due to the sheer scale of computations necessary.
+- a full text index takes a word and immediately tells you all documents that contain that word.
+- relevancy ranking
+- webmasters may spoof the search engines to aid their ranking improvement.
+
+## HTTP-NG 
+
+- HTTP growing pains
+  - Complexity
+  - Extensibility
+  - Performance
+  - Transport dependence
+- Outline
+  - Modularize and enhance
+  - Modularize it into 3 layers
+    - message transport layer
+    - remote invocation layer
+    - web application layer
+    
+## Identification, Authorization and Security
