@@ -221,7 +221,138 @@ for (let i = 1; i<=10; i++ ){
 
 ````
 
+- Loop over array, string using length as the index.
+- Can nest loops 
+
+- While loop
+- ideal for checking against a certain condition.
+
+```js
+
+let j = 0;
+while (j < 10) {
+ console.log(j)
+
+}
+
+```
+
+- for..of
+- cleaner version of for loop
+- Objects are ot iterable by default so need to access the Object.keys(objectname) to make it iterable.
+
+- for..in
+- loop over properties of an object
+
+## Functions
+
+- reusable procedures, modularise code.
+- function statement
+- can nest functions inside other functions
+
+```js
+
+function fname(){
+ 
+
+}
+fname()
+
+const fname = function(){
+ 
+
+}
+```
+- arguments vs parameters
+- return statement, functions do not automatically have a return  value unless explicitly declared as a return value.
+- return statement halt execution of a function.
+
+- Function scope
+- let/const and var have different scoping rules.
+- lexical scope
+- function expressions since functions are objects too.
+- Higher order functions
+ - functions that operate on other functions, accept functions as arguments and also return values
+- Callback functions
+ - function passed into another function as an argument, which is then invoked inside the outer function.
+ - used commonly with anonymous functions
+- Hoisting
+ - let/const(does not) vs var(does) behaviour.
+ - function declarations are hoisted vs function expressions are not.
+
 ## From Browser Implementations
 
 - Always initialise your objects in the same way, so they dont end up having different shapes.
 - Don't mess with property attributes of array elements, so they can be stored and operated on efficiently.
+
+## Javascript Algorithms
+ref:`Frontend Masters`
+
+- Space(memory) and Time(primitive operations) complexity
+- WRT input size
+- constant(O(1)) -> logarithmic(O(logn)) -> linear(O(n)) -> Quadratic(O(n^2)) -> exponential(O(k^n))
+- drop the constants.
+- caching vs memoization
+ - memoization is saving the result of function call.
+- memoization with closures, privatise the cache object inside the function.
+
+## Recursion
+
+- when a function calls itself
+- identify base case
+- identify the recursive case
+- return where appropriate
+- turn loops into recursion and vice versa
+- formats
+  - wrapper functions
+  - accumulator - result is passed down into each recursion.
+- closure is a function that is called inside another function.
+
+## Divide and Conquer
+
+- Binary Search
+  - cut in half
+  - sorted
+- Linear search
+  - time complexity is linear
+- Comparison sorts
+  - Naive sorts
+    - keep looping and comparing values until the list is sorted.
+      - Bubble sort
+        - compare adjacent items and swapping till sorted
+      - Insertion sort
+      - Selection sort
+  - Divide and Conquer sort
+    - recursively divide lists and sort smaller parts of the list until entire list is sorted
+      - Mergesort
+        - recusively merge sorted sub-lists
+      - Quicksort
+
+### Greedy Algorithms
+
+- making the locally optimal choice.
+
+### Brute Force 
+
+- alternate to greedy where you go through all the combination of possible solutions
+
+### Dynamic Programming
+
+- cache values to avoid repeated calculations.
+- top-down recursive technique
+- bottom-up iterative technique
+- memoised called are constant time look-up.
+- correctly identify the subproblems, memoize the results, if need to solve again, look up the results.
+- subproblem dependencies should be acyclic otherwise one gets infinite algorithms. 
+- when cyclic, make graph acyclic, this however increases number of subproblems.
+- time = # of problems + time per problem
+- you can incorporate space complexity by deleting all but last 2 when computing another one.
+- Shortest paths problem: guessing technique
+- 5 general steps in DP
+  - Define subproblems, count them too
+  - Guess(part of the solution), # choices for guesses
+  - Relate subproblems solutions, time/subproblem
+  - Recurse and Memoize or build DP table bottom-up, check subprob recurrence is acyclic, has topological order.
+  - Solve original problem, combining may take some time.
+- Look into text justification problem.
+- Parent pointers: remember what guess was the best
