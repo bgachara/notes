@@ -280,10 +280,169 @@ const fname = function(){
  - let/const(does not) vs var(does) behaviour.
  - function declarations are hoisted vs function expressions are not.
 
+### Array Callback Functions
+
+- For...each
+  - passed function is called for each element in the array.
+- Map
+  - creates a new array with the results of calling a callback on every element in the array  
+- Find
+  - finds and retrieves value of first result that matches provided testing function
+- Filter
+  - creates a new array with all elements that pass test implemented by passed function.
+- Every
+  - tests whether all elements in array pass the provided function, returns boolean value.
+- Some
+  - tests whethe any of the elements in array passes the provided function, also returns boolean.
+- Sort
+  - pass in a compare function,comp(a,b) result compared to 0
+  - mutates array in place.
+- Reduce
+  - executes a reducer function on each element of the array
+  - array.reduce((accumulator, currentValue) => {sum, max_value, min_value, }, init value)
+  - can use an object as an initial value.
+
+```js
+//arrow functions
+
+const arrow = (y) => {
+  return y*y;
+}
+
+const arrow = y => y*y;
+
+```
+
+
+### More Js features
+
+- Default values
+  - function(a, b=1)
+  - should come at the end.
+- Spread
+  - allows an iterable to be expanded in places where zero or more arguments or elements are expected.
+  - used in function calls, array literals, object literals.
+  - max(...num)
+- Rest
+  - same syntax as spread but different use.
+  - collects all remaining arguments of the function call.
+  - not an array-like object but a real array.
+  - should be the last parameter, and can be used with arrow functions.
+- Destructuring
+  - capture elements from an iterable/compound element.
+  - const [name, age, group] = data
+  - array, objects, function definition
+  
+### Objects
+
+- Shorthand syntax of naming variables as their result type.
+- Computed properties
+  - syntax: [user]: 'Admin'
+- Methods
+  - can add functions as properties on objects, this are called methods
+  - dont have to add name to the key:value pair of object.
+- Keyword THIS.
+  - object reference to current execution scope.
+  - variable declaration with var added to global window scope but not let and const.
+  - value of this depends on invocation context of the function it is used in.
+  - arrow functions don't get their own execution context
+  - leftside.function_call()....leftside = context of this.
+  - arrow functions get this context from the context right above.
+  
+
+## Asynchronous code
+
+- Call Stack
+- Js is single threaded.
+- Browser via Cpp does the setInterval kind of operations.
+- Callback Hell
+- Promises
+  - object representing the eventual completion or failure of an asynchronous operation.
+  - creating promises
+    - new Promise(resolve, reject) => {};
+    - .then() is called when the promise resolves.
+    - .catch() is called when the promise is rejected.
+    - in-between those states the promise status is pending.
+    - can create a function that returns a promise
+    - can have data in resolve(data) that can be accessed on resolve/rejection
+    - chaining .then() enabled if the first function returns a promise.
+  - consuming promises
+  
+## Sending Requests
+
+- AJAX
+- XML
+- JSON
+  - data format
+- XmlHttpRequest
+- Fetch
+  - promise based.
+  - content of response is a readablestream.
+  - only reject on network failure but never on status code i.e 404, 500
+  - manually throw an error to activate .catch()
+  
+## Async Functions
+
+- async functions always return a promise
+  - promise resolves with the return value, else rejected i.e when exception thrown
+- await keyword used inside the async function
+- can use a try and catch block over it to catch errors or chain .catch() on the function call itself
+- sequential vs parallel asyncs and awaits
+- in parallel execution, use Promise.All() to resolve multiple promises.
+
+
+### OOP Js
+
+- prototypes are template objects which are shared among structures of the same type, used to share methods
+  - array.prototype, string.prototype, object.prototype
+- Factory functions
+  - function build an object then returns it at the end
+- Constructor function
+  - define a function.
+  - use the new keyword
+    - creates a blank, plain javascript object
+    - links (sets constructor of) this object to another object
+    - passes newly created object from step 1 as the this context
+    - retruns this if the functions does not return its own object
+  - access the prototype object and add methods on it, dont use arrow functions
+- Class syntax
+  - check in code sample
+  - simpler version implementation of constructor function
+  - use of keyword `extends`
+  - use also of super() keyword to re-use constructor function of extended class.
+
+
+```js
+
+async function make() {
+  //this is a promise returning function
+}
+
+//class definition
+
+class Car {
+  constructor(args here){
+    
+  }
+  
+  greet(){
+    
+  }
+  
+  cook(){
+    
+  }
+}
+
+```
+
+
 ## From Browser Implementations
 
 - Always initialise your objects in the same way, so they dont end up having different shapes.
 - Don't mess with property attributes of array elements, so they can be stored and operated on efficiently.
+
+
 
 ## Javascript Algorithms
 ref:`Frontend Masters`
@@ -292,8 +451,8 @@ ref:`Frontend Masters`
 - WRT input size
 - constant(O(1)) -> logarithmic(O(logn)) -> linear(O(n)) -> Quadratic(O(n^2)) -> exponential(O(k^n))
 - drop the constants.
-- caching vs memoization
- - memoization is saving the result of function call.
+- caching vs memoization 
+- memoization is saving the result of function call.
 - memoization with closures, privatise the cache object inside the function.
 
 ## Recursion

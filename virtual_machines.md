@@ -46,9 +46,11 @@
   - data structures in memory have semantic meaning such as code and data.
   - reflection data or metadata is produced at load time that help vm understand application.
   - dynamic linker resolves all referenced symbols into accessible memory addresses, may trigger loader to load more data and code.
+  - linker is a compile-time component while dynamic linker is a runtime component.
 
 - Execution engine
   - performs the operations specified by the code and is the core component of the virtual machine.
+  - can be implemented in interpreter or compiler or flexible hybrid.
 
 - Memory manager
   - manage its data and the memory containing the data.
@@ -61,6 +63,7 @@
       - Visible to the application.
       - Dynamic data stored in the application heap.
   - Memory manager usually manages only the application data leaving the virtual machine data to internal or underlying system.
+  - Memory manager component is always necessary and desirable for a virtual machine.
 
 - Thread Scheduler
   - allows system to have multiple control flows.
@@ -80,13 +83,37 @@
       - Code can be inlined or embedded in the host language or invoked via a well wrapped function interface, object, module or class.
       - C the most popular foreign language due to its low-level nature.
 
+### Traditional vs Virtual Machine model
+
+- Traditional execution model
+  - Need a compiler to translate source code into x86 machine code.
+  - Linker to package the result into an executable.
+  - When its executed, loader is needed to load files into memory and then a dynamic linker resolves all referenced symbols to memory addresses.
+  - Finally, runtime services prepare runtime stack and execution context and then transfer program control to main() function as entry point to application.
+  - This whole process decouples a language support into two stages: compile-time stage centered on compiler and runtime stage around an operating system.
+  - In the case of an interpreter, such decoupling does not exist.
+- Virtual Machine
+  - Does everything at runtime.
+- Hybrid systems bridge those two divides by compiling some code before-hand.
+
+
 ## Virtual ISA
 
+- A language vm can implement an actual language or a virtual language.
 - Virtual language is used as the compilation target of other language.
 - Mostly used for intermediate representation purpose, hence not exactly readable.
 - i.e Java bytecode, LLVM bitcode, ParrotVM bytecode.
 - Assembly language may also be counted here.
 - Virtual ISA is a kind of virtual language that defines the instruction set and execution model of a virtual machine.
+
+### JVM
+
+- JVM spec is not only a set of virtual instructions, but also the architectural models of an abstract computing machine, including execution, memory, threading and security model.
+- JVm instruction opcodes are encoded in one byte, thus bytecode
+- Opcode is the data that specifies the operation to perform by the instruction.
+- A byte can encode 254 numbers, 198 are currently used. 51 unused and 3 reserved for JVM implementation's runtime services and should never appear in app code.
+- Many other languages can be compiled into Java bytecode, thus run in JVM.
+- Another way of running other languages in JVM is to develop their virtual machine in Java.
 
 ## Data Structures in VMs
 

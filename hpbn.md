@@ -1978,3 +1978,7 @@ ref:`High Performance Browser Networking`
     - web application layer
     
 ## Identification, Authorization and Security
+
+### Client Identification and Cookies
+
+- Web servers may talk to many clients simultaneously often need to keep track of who they are talking to.
