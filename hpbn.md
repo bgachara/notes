@@ -1979,6 +1979,82 @@ ref:`High Performance Browser Networking`
     
 ## Identification, Authorization and Security
 
-### Client Identification and Cookies
-
+### Client Identification and Cookies 
 - Web servers may talk to many clients simultaneously often need to keep track of who they are talking to.
+- Modern websites want to provide a personal touch...
+  - personal greeting
+  - targeted recommendations
+  - administrative information on file.
+  - Session tracking
+- HTTP headers
+  - headers used to carry information about the user.
+    - From - email address
+    - User-Agent - browser s/w
+    - Referer - page user came from
+    - Authorization - username and password
+    - Client-ip
+    - X-Forwaded-for
+    - Cookie
+- Client IP address
+  - Web servers can identify the ip address of client via a TCP connection....i.e getpeername() on Unix machines
+  - HTTP headers don't contain IP addresses
+  - This has numerous weaknesses....name them
+    - many users can be using one machine so unique machine not unique user.
+    - ISP assign ips dynamically
+    - proxies and gateways get to send requests as users too.
+    - NAT firewalls
+- User login
+  - HTTP includes a built-in mechanism to pass username information to websites, WWW-Authenticate and Authroization headers.
+  - HTTP 401 login required.
+  - FAT urls
+    - URLs modified to include user state information.
+    - Issues
+      - Breaks caching
+      - can't share urls
+      - extra server load
+      - Escape hatches
+      - Not persistent across sessions
+- Cookies
+  - best current way to identify users and allow persistent sessions.
+  - Types of cookies
+    - Sessions cookies
+      - temporary cookies that keeps track of settings and preferences as a user navigates a site.
+      - it's deleted when a user exits a site.
+    - Persistent cookies
+      - they live longer and are stored on disk and survive browser exits and computer restart
+  - attach to the Set-Cookie HTTP response header.
+  - can be anything from name=value pairs to unique ids referencing information on the server.
+  - basic idea of a cookies is to let the browser accumulate a set of server-specific information and provide this information back to the server each time you visit, client-side state.
+  - Different cookies for different sites
+    - typically only send two or three cookies to each site.
+    - a browser only sends to a server cookies it has generated.
+    - server attaches a domain attribute to the Set-Cookie header
+    - also exits the cookie path attribute, to indicate exact path the cookie is valid
+  - Cookie ingredients
+    - specs
+      - Persistent client state: HTTP Cookies
+      - RFC 2965:HTTP State management mechanism.
+  - Cookies and session tracking
+  - Cookies and caching
+  - Cookies, Privacy and Security
+  
+### Basic Authentication
+
+- Authentication means showing some proof of your identity.
+- HTTP chellenge/response authentication framework.
+- Authentication protocol and headers
+  - challenge - WWW-Authenticate
+  - authorization - authorization
+  - success - authentication-info
+- Security realms
+  - web servers group protected documents into security realms, each with different set of authorized users.
+- Basic authentication
+  - server initiates challenge by returning a 401 status code and specifies the security realm being accessed.
+- Base64 username/password encoding 
+- Proxy authentication
+- Security Flaws
+  - base64 is a trivial encoding.
+  - prone to spoofing
+
+### Digest Authentication
+

@@ -7,6 +7,7 @@ Ref:
 `Database System Concepts 7th Edition`
 `CMU: Intro to Databases Systems`
 `Mysql for Developers: Aaron@planetscale.com`
+`Database Internals: Alex Petrov`
 
 
 ## Introduction
@@ -501,7 +502,23 @@ BIGINT     - 8  - -2^63
       - Full transaction functionality support
       - Row level locking     
       
+## Evaluation Criteria
 
+## Data-Intensive Apps
+
+- Reliability
+  - Tolerating hardware and software faults and human arror
+- Scalability
+  - Measuring load and performance, Latency percentiles and throughput
+- Maintainability
+  - Operability, simplicity and evolvability
+- Fault vs Failure
+  - fault is when a particular system component deviates from its spec, whereas a failure is when the system as a whole stops providing required service to user.
+  
+## Data Models
+
+- Object-relational Mismatch
+- Declarative vs Imperative
 
 ## Anatomy of a DB.
 

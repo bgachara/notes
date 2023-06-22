@@ -33,3 +33,70 @@
 - Other interest include Real Estate, Economics and Finance.
 - Maintain family website and a company website via AWS.
 - Lightsail switch from aws compute
+
+
+
+## Career preferences
+
+- Js runtimes, virtual machines.
+- Frontend Engineer
+- Database development
+- Language development
+- Rust development
+- Technical support
+
+- Performance Nerd.
+
+
+## Abilities
+
+- Frontend development
+  - HTML
+  - CSS
+  - Js
+  - Ts
+  - React
+- System development
+  - Linux/Unix
+  - Assembly language
+- Other abailities
+  - Postgres
+  - Rust
+  - Laravel*
+  - Node.js
+  - Aws
+- Projects
+  - Landing pages
+  - Documentation site 
+    - Gatsby, Static Site
+  - Construction management 
+    - Nextjs
+    - Laravel
+  - Personal projects
+  - Other projects
+    - maintain two websites
+- Main duties
+  - support engineer
+  - system administration
+  - user training 
+- Familiarities
+  - Network Architectures
+  - Database Architectures
+  - Browser Archs
+  - Compilers/Interpreters/Virtual Machine
+
+
+## Road to bridge existing gaps
+
+- Finish the HTTP book, authentication and hosting chapters.
+- Rust system book finish
+- Review the database literature
+- Finish the Nodejs chat and file upload apps.
+- Implement a reactive signal based frontend framework...ala Qwik..using the leptos template.
+- Read up on Webassembly.
+- Polish up my CV
+- Review and amend Jegamu and Elmies sites.
+- Revisit the valuation / tenant reference proposals
+- Start reading the system programming book
+- Finish up and practice on DSA, B+ trees
+- 
