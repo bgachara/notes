@@ -328,6 +328,60 @@ BIGINT     - 8  - -2^63
     
   - EXPLAIN
     - Learn to read and interpret the EXPLAIN statement.
+    - Keyword meanings
+      - cost to get first row, cost to get all rows.
+      - rows: number of rows.
+      - width: average width of a row in bytes.
+      - loops: number of loops in each row
+      - Buffers: blocks read and write, in cache(hit/read) and outside(write), measured in blocks
+      - Filter:
+      - Rows removed by Filter:
+    - Major scan modes
+      - Sequential scan
+        - read all the tables in sequential order
+      - Index scan
+        - read the index to filter on the WHERE clause and table to filter invsible rows.
+      - Bitmap Index scan
+        - same, but read fully the index and then the table, much quicker for a bigger number of rows.
+      - Index only scan
+        - for covering indexes
+    - Join types
+      - Hash join
+        - only equality join
+        - really quick with enough memory
+        - but slow start
+      - Merge join
+        - sort, then merge.
+        - slow start with no index
+        - quickest on big data sets
+      - Nested loop
+        - for small tables
+        - easy to start, hard to quit. 
+```sql
+
+EXPLAIN SELECT * FROM foo;
+
+QUERY PLAN
+--------------
+Seq Scan on foo (const 0.00..18584.82 rows=1025082 width=36) 
+
+--add the ANALYZE keyword to get the actual stats, though it also executes the query, so best to wrap it in a transaction so one can rollback.
+
+EXPLAIN ANALYZE SELECT * FROM foo;
+
+--also add the BUFFERS option
+
+EXPLAIN ANALYZE, BUFFERS SELECT * FROM foo;
+
+QUERY PLAN
+--------------
+Seq scan on foo () Buffers: shared read=8334
+
+--text_pattern_ops
+--Bitmap Index scan on columnname__idx
+--Index only scan using column_name on table__name
+
+```
   
   - Explain access type
     - Const - unique look up
