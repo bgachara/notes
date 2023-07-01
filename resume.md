@@ -3,7 +3,7 @@
   
 ## Guidng Pointers
 
-- Been a support engineer since 2018, around 5 years straight daily without leeave. sigh!!
+- Been a support engineer since 2018, around 5 years.
 - Support for both customers and new employees.
 - Intersection between prodcut engineering and user expectations plus use, very important to have both sides.
 - Deployed to site to see and interact with users, training, gathering and providing immediate feedback.
