@@ -308,4 +308,107 @@ ref: `patterns.dev`
   - Can combine compression with other techniques such as minification, code-splitting, bundling, caching and lazy-loading though these techniques may be at odds sometime.
   - Gzip and Brotli most common.
   - Brotli offers better compression ratio.
-  - Next.js provides Gzip compression by default
+  - Next.js provides Gzip compression by default but recommends enabling it on proxy.
+  - Single large bundle gives better compression than multiple smaller ones.
+  - HTTP compression(Accept-Encoding Header -> Content Encoding)
+  - Minification - remove whitespace and unnecessary code.(Terser, Webpack)
+  - Static(ahead-of-time) vs Dynamic(on-the-fly) compression.
+  - Granularity trade-off
+    - Improve donwload speed
+    - Improve cache hits and caching efficiency
+    - Execute Fast
+  - `Granular chunking` 
+  
+## Design Patterns
+
+- Singleton Pattern
+  - share a single global instance throughout our application.
+  - use variable equal to a reference to instance when a new one is created.
+  - Object.freeze makes sure consuming code cannot modify singleton.
+  - Tradeoffs
+    - save on memory, as only one needed.
+    - singleton considered anti-pattern.
+    - testing is hard
+    - dependency hiding
+    - global behaviour
+  - State management in React, global state over singletons, read-only as opposed to mutable state of singleton.
+- Proxy Pattern
+  - intercept and control interactions to target objects.
+  - new Proxy(obj, {get, set}), {} reps handler.
+  - useful to add validation.
+  - reflect built-in object to work with target object.
+  - formatting, notifications or debugging.
+  - not recommended for performance code.
+- Provider Pattern
+  - make data available to multiple child components.
+  - createContext()
+  - value prop that can carry data to all components wrapped within this provider.
+  - useContext hook
+  - useful for sharing global data, i.e UI theme data. 
+  - Major con is components have to consume the context to re-render on each state change
+- Prototype Pattern
+  - share properties among many objects of the same type.
+  - easily let objects access and inherit properties from other objects.
+- Container/Presentation Pattern
+  - enforce separation of concerns by separating view from the application logic.
+  - presentation - how vs container - what
+  - container elements pass data to presentational elements.
+  - Hooks though made this easier as they act as container elements themselves.
+- Observer Pattern
+  - use observable to notify subscribers when an event occurs.
+  - subscribe certain objects, observers, to another object, observable.
+  - observable object contains 3 important parts
+    - observers - arrays of objects to be notified.
+    - subscribe()
+    - unsubscribe() - remove observers
+    - notify() - fire when event happens
+  - useful in asynchronous, event-based data.
+  - RxJs
+  - prone to complexity.
+- Module Pattern
+  - split up your code into smaller, reusable pieces.
+  - named exports then import{} from where/they/are
+  - for cases of collision, we can use rename using as.
+  - could also use `default export`, although only one per module.
+  - also import using * for all exports.
+  - dynamic import using import() which can receive expressions allowing for passing template literals.
+- Mixin Pattern
+  - Add functionality to objects or classes without inheritance
+  - A mixin is an object we can use in order to add reusable functionality to another object or class without using inheritance.
+  - Mixins can't be used on their own.
+  - Object.assign(obj.prototype, mixin)
+- Mediator/Middleware Pattern
+  - use a central mediator object to handle communication between components.
+  - prevent all objects from talking to every other object, many-to-many relationship
+- HOC Pattern
+  - pass reusable logic down as props to components throughout your application
+  - logic can be styling components, authorization, adding global state.
+  - HOC is a component that receives another component, HOC contains logic that we want to apply to passed parameter component, returning component after applying logic.
+- Render Props Pattern
+  - pass jsx elements to components through props.
+  - a render prop is a prop on a component, which value is a function that returns a JSX element.
+  - props.render()
+  - render props over lifting state
+- Hooks Pattern
+  - use functions toreuse stateful logic among multiple components throughout the app.
+  - manage a component state and lifecycle methods
+  - make it possible to
+    - add state to functional component
+    - manage a component lifecyle without having to use lifecycle methods
+    - reuse the same stateful logic among multiple components throughout the app.
+  - add state using useState()
+  - [value, setValue] = useState(initValue);
+  - useEffect combines DidMount,DidUpdate,WillUnmount
+  - uses a dependancy array.
+- Flyweight Pattern  
+  - reuse existing isntances when working with identical objects.
+  - 
+- Factory Pattern
+  - use a factory function in order to create objects
+- Compound Pattern
+  - create multiple components that work together to perform a single task.
+  - make one component a property of another component.
+  - 
+- Command Pattern
+  - decouple methods that execute tasks by sending commands to a commander.
+  - replace class methods with one that executes any command passed to it.
