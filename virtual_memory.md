@@ -1,3 +1,11 @@
+---
+title: Virtual Memory
+description: Notes on how OS virtual memory works
+date: 2023-01-01
+tags:
+  - memory
+  - OS
+---
 # Virtual Memory
 
 `Notes on Virtual Memory`

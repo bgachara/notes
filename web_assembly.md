@@ -1,3 +1,11 @@
+---
+title: Web Assembly
+description: Notes on the WebAssembly
+date: 2023-04-01
+tags:
+  - webassembly
+  - compiler
+---
 # Web Assembly
 
 ref: `MDN Docs`

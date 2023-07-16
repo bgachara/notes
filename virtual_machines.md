@@ -1,3 +1,11 @@
+---
+title: Virtual Machines
+description: Notes on Virtual Machines in all their forms.
+date: 2023-04-01
+tags:
+  - virtual machines
+  - languages
+---
 # Notes on Virtual Machine.
 
 `programming language virtual machines need a page of their own.`
