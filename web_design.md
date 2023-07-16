@@ -1,3 +1,11 @@
+---
+title: Web Design
+description: Notes on web design course on Envato Tuts
+date: 2023-05-01
+tags:
+  - Design
+
+---
 # Web Design
 
 `Notes from the web design course on envato tuts`
