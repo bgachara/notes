@@ -33,38 +33,42 @@ ref:
 
 ## Computer Hardware
 
-- Processor - fetch, decode, execute cycle.
-            - introduction of pipelines for more work.
-            - superscalar CPU.
-            - Different register types.
-            - Moore's Law - transistor doubling every 18 months.
-            - Multithreading/ Hyperthreading - each thread appears to the CPU as a separate CPU.
-            - Multicore chips.
+- Processor 
+  - fetch, decode, execute cycle.
+  - introduction of pipelines for more work.
+  - superscalar CPU.
+  - Different register types.
+  - Moore's Law - transistor doubling every 18 months.
+  - Multithreading/ Hyperthreading - each thread appears to the CPU as a separate CPU.
+  - Multicore chips.
 
-- Memory - should ideally be faster than the CPU so no memory access times.
-         - constructed as a hierarchy of layers.
-         - register -> cache -> main memory -> magnetic disk
-         - questions to every cache situation:
-            - when to put new item in cache.
-            - which cache line to put new item in.
-            - which item to remove from cache
-            - where to put newly evicted item in main memory
+- Memory 
+  - should ideally be faster than the CPU so no memory access times.
+  - constructed as a hierarchy of layers.
+  - register -> cache -> main memory -> magnetic disk
+  - questions to every cache situation:
+    - when to put new item in cache.
+    - which cache line to put new item in.
+    - which item to remove from cache
+    - where to put newly evicted item in main memory
 
-- I/O Devices - consist of the controller and the device itself.
-              - controller is a chip or set of chips that physically controls the device...accepts commands from the OS.
-              - Device driver is s/w that talks to a controller, giving commands and accepting responses.
-              - To be used, device driver has to be put into OS so as to run in kernel mode.
-              - Can run in user mode but rarely is this as its a feature where access in a controlled way is required.
-              - device registers form the I/O port space.
-              - I/O implemented in three ways
-                  - Busy waiting.
-                  - Interrupts.
-                  - Direct Memory Access.
+- I/O Devices 
+  - consist of the controller and the device itself.
+  - controller is a chip or set of chips that physically controls the device...accepts commands from the OS.
+  - Device driver is s/w that talks to a controller, giving commands and accepting responses.
+  - To be used, device driver has to be put into OS so as to run in kernel mode.
+  - Can run in user mode but rarely is this as its a feature where access in a controlled way is required.
+  - device registers form the I/O port space.
+  - I/O implemented in three ways
+      - Busy waiting.
+      - Interrupts.
+      - Direct Memory Access.
 
-- Buses - As processors and memories got faster, ability of one bus became strained and thus more were added.
-        - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
-        - Bask Input Output System (BIOS)
-        - contains low-level i/o software i.e read keyboard, write to screen, disk i/o.
+- Buses 
+  - As processors and memories got faster, ability of one bus became strained and thus more were added.
+  - i.e : cache, local, memory, PCI, USB, IDE, SCSI and ISA.
+  - Bask Input Output System (BIOS)
+  - contains low-level i/o software i.e read keyboard, write to screen, disk i/o.
         
 
 ### Booting up computer
@@ -110,6 +114,10 @@ ref:
 - associated with each process is its address space, a list of memory locations  from 0 to some maximum which can read and write to.
 - Address space contains executable program, program's data, and its stack.
 - also with each process is some resources, registers(program counter and stack pointer), open files, outstanding alarms, related processes and any other info needed to run program
+- Encapsulate one or more threads sharing process resources.
+- Fundamental tradeoff between protection and efficiency.
+  - communication easier within a process
+  - communication harder between processes.
 - A process is thus a container with all information needed to run a program.
 - Process starts life as an executable object code, which is a machine-runnable code in executable format that the kernel understands(ELF)
   - most important sections are the text section, bss section and data section.
@@ -119,6 +127,7 @@ ref:
 - They request and manipulate resources only via system calls.
 - A process resources, along with the data and statistics related to it are stored in the kernel inside the process pd.
 - Kernel seamlessly and transparently preempts and reschedules processes, sharing system processors among all processes.
+
 - Threads
   - unit of activity within a process
   - abstraction responsible for executing code and maintaining the process running state.
@@ -126,6 +135,15 @@ ref:
   - consists of a stack(stores local variables), processor state and a current location in the object code(stored in processor instruction pointer)
   - majority of other parts of a process are shared among threads, most notable process address space.
   - threads share virtual memory abstraction hwile maintaining the virtualized processor abstraction.
+  - TCB(thread control block)
+    - Holds contents of registers when thread not running.
+    - stored in the kernel.
+  - Threads encapsulate concurrency: active component
+  - Address psaces encapuslate protection: passive component. keeps buggy programs from crashinf system.
+  - Why have multiple threads per address space
+    - parallelism: take advantage of actual hardware parallelism
+    - concurrency: ease of handling I/O and other simultaneous events.
+    
 - Process hierarchy
   - each process has a unique PID, starting from 1 and all others following from that.
   - in linux they form a strict hierarchy, known as a process tree, rooted at the init process.
@@ -135,6 +153,25 @@ ref:
 
 ### Address spaces
 
+- The set of accessible addresses + state asscoiated with them.
+    - For a 32-bit processor: 2^32 = 4 billion(10^9) addresses.
+    - For a 64-bit processor: 2^64 = 18 quadrillion(10^18) addresses.
+- What happens when you read or write to an address??
+- Simple multiplexing has no protection, so OS must protect itself from user programs.
+  - Reliability
+  - Security
+  - Privacy
+  - Fairness
+- Simple protection
+  - Base and bound: user registers to constrict operating area of a program, isolating program.
+  - Simple address transaltion with base and bound, use of a base address for on-the-fly translation.
+  - Segments and stacks.
+  - Address space translation
+    - program operates in an address space that is distinct from the physical memory space of the machine.
+  - Paged virtual address.
+    - instructions operate on virtual addresses
+    - translated to a ohysical address via a page table by the hardware.
+    - any page of address space can be in any page sized fram in memory.
 - Holds executing program.
 - On many computers addresses are 32 or 64 bits, giving address space of 2^64 bytes.
 - Virtual memory augments processes where their address space is larger than what is available.
@@ -224,6 +261,26 @@ ref:
 - every bit has a field for read, write and execute access.
 - rwxrwxrwx
 
+### Dual Mode Operation
+
+- Hardware providea at least two modes
+  - Kernel Mode
+  - User Mode
+- Certain Ops are prohibited when running in user mode.
+- Careful controlled transitions between user mode and kernel mode.
+  - syscalls
+    - process requests a system service, e.g exit
+    - like a function call but outside the process
+    - does not have the address of the system function to call.
+    - marshall the syscall id and args in registers and exec syscall.
+  - interrupts
+    - external asynch event triggers content switch.
+    - independent of user process.
+    - e.g timer, i/o device
+  - exceptions
+    - internal synch event in process triggers context switch.
+    - protection violation(seg fault). divide by zero
+  
 ### Signals
 
 - one way communication for asynchronous notifications
